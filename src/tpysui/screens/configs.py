@@ -848,13 +848,6 @@ class PyCfgScreen(Screen[None]):
     }
     """
 
-    BINDINGS = [
-        ("ctrl+f", "select", "Select config"),
-        ("ctrl+s", "savecfg", "Save a copy"),
-        ("ctrl+g", "genstub", "Generate a Pyton stub"),
-        ("ctrl+n", "newcfg", "Create a new config"),
-    ]
-
     configuration: reactive[PysuiConfiguration | None] = reactive(None, bindings=True)
 
     def __init__(
@@ -883,10 +876,12 @@ class PyCfgScreen(Screen[None]):
 
     async def action_newcfg(self) -> None:
         """Create a new PysuiConfig.yaml."""
-        self.new_configuration()
+        self.new_configuration_work()
 
     @work()
-    async def new_configuration(self) -> None:
+    async def new_configuration_work(
+        self, event: ButtonStatic.Pressed | None = None
+    ) -> None:
         """Do the work for creatinig new configuration."""
 
         def check_selection(selected: NewConfig | None) -> None:
@@ -926,10 +921,10 @@ class PyCfgScreen(Screen[None]):
 
     async def action_savecfg(self) -> None:
         """Save configuration to new location."""
-        self.save_to()
+        self.save_to_work()
 
     @work()
-    async def save_to(self) -> None:
+    async def save_to_work(self, event: ButtonStatic.Pressed | None = None) -> None:
         """Run save to modal dialog."""
 
         def check_selection(selected: Path | None) -> None:
@@ -948,10 +943,10 @@ class PyCfgScreen(Screen[None]):
 
     async def action_genstub(self) -> None:
         """Generate a Python stub"""
-        self.gen_to()
+        self.gen_to_work()
 
     @work()
-    async def gen_to(self) -> None:
+    async def gen_to_work(self, event: ButtonStatic.Pressed | None = None) -> None:
         """Fetch a location."""
 
         def check_selection(selected: GenSpec | None) -> None:
@@ -966,10 +961,10 @@ class PyCfgScreen(Screen[None]):
 
     async def action_savecfg(self) -> None:
         """Save configuration to new location."""
-        self.save_to()
+        self.save_to_work()
 
     @work()
-    async def save_to(self) -> None:
+    async def save_to_work(self, event: ButtonStatic.Pressed | None = None) -> None:
         """Run save to modal dialog."""
 
         def check_selection(selected: Path | None) -> None:
@@ -987,10 +982,12 @@ class PyCfgScreen(Screen[None]):
         self.app.push_screen(ConfigSaver(), check_selection)
 
     async def action_select(self) -> None:
-        self.select_configuration()
+        self.select_configuration_work()
 
     @work()
-    async def select_configuration(self) -> None:
+    async def select_configuration_work(
+        self, event: ButtonStatic.Pressed | None = None
+    ) -> None:
         """Run selection modal dialog."""
 
         def check_selection(selected: Path | None) -> None:
@@ -1004,53 +1001,61 @@ class PyCfgScreen(Screen[None]):
             ConfigPicker(config_accept="PysuiConfig.json"), check_selection
         )
 
-    def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
-        """Check if an action may run."""
-        if action in ["savecfg", "genstub", "edit"] and self.configuration is None:
-            return None
-        return True
-
-    @on(ButtonStatic.Pressed)
-    async def button_pressed(self, event: ButtonStatic.Pressed) -> None:
-        logger.debug(f"Received {event.button.id}")
-
     @work()
     async def main_popup(self, event: events.Click) -> None:
-        event.offset
-        self.app.push_screen(PopUpMenu(self, ["Fin", "Foo", "Bar"], event.offset))
+        a_list: list[str] = [
+            "Open Pysui Configuration...",
+            "New Pysui Configuration...",
+        ]
+        c_list: list = [self.select_configuration_work, self.new_configuration_work]
+        if self.configuration:
+            a_list.extend(["Save As...", "Stub code from Configuration..."])
+            c_list.extend([self.save_to_work, self.gen_to_work])
+        self.app.push_screen(PopUpMenu(self, a_list, event.offset, c_list))
+
+    def on_key(self, event: events.Key) -> None:
+        """Handles key events.
+
+        Args:
+            event (events.Key): They keyboard event
+        """
+        match event.key:
+            case "ctrl+f":
+                self.select_configuration_work()
+            case "ctrl+n":
+                self.new_configuration_work()
+            case "ctrl+s":
+                if self.configuration:
+                    self.save_to_work()
+            case "ctrl+g":
+                if self.configuration:
+                    self.gen_to_work()
 
     def on_click(self, event: events.Click):
+        """Handles mouse events, specifically watching for right mouse click.
+
+        Args:
+            event (events.Click): The mouse click event
+        """
         if event.button == 3:
             event.stop()
             wid: str = event.widget.id
-            logger.debug(f"Right mouse for {wid}. Event stopped.")
             if wid:
                 # Direct on edit table
                 if wid.endswith("table"):
                     owner: ConfigRow = event.widget.parent
-                    logger.debug(f"Table {wid} of {owner.id} with {self.configuration}")
                     owner.show_popup(event.widget)
                 # Direct to profiles and identities
                 elif wid.endswith("row"):
-                    logger.debug(f"Widget id: {wid} context with {self.configuration}")
                     event.widget.show_popup()
                 # Indirect to group
                 elif wid.endswith("horizontal"):
                     owner: ConfigRow = event.widget.parent
-                    logger.debug(
-                        f"HorzBar id: {wid} of {owner.id} context with {self.configuration}"
-                    )
                     owner.show_popup()
             else:
                 # This is in our space
                 if event.widget.parent and event.widget.parent.id == "config-header":
-                    logger.debug(
-                        f"Header id: {event.widget.parent.id} context with {self.configuration}"
-                    )
                     self.main_popup(event)
                 # No idea
                 else:
                     owner = event.widget.parent if event.widget.parent else None
-                    logger.debug(
-                        f"No id:{type(event.widget)} on {owner} with {self.configuration}"
-                    )

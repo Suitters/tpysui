@@ -5,6 +5,16 @@
 
 """Termpysui TUI Application."""
 
+import logging
+
+logging.basicConfig(
+    filename="tpysui.log",
+    filemode="w",
+    encoding="utf-8",
+    format="%(asctime)s %(module)s %(levelname)s %(message)s",
+    level=logging.DEBUG,
+)
+
 from textual.app import App
 from textual.binding import Binding
 from .screens import PyCfgScreen, MystenCfgScreen

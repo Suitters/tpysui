@@ -6,6 +6,7 @@
 """Configuration screen for App."""
 
 from functools import partial
+import logging
 from pathlib import Path
 from typing import Optional
 from rich.text import Text
@@ -14,6 +15,7 @@ from textual.app import ComposeResult
 from textual.coordinate import Coordinate
 from textual.containers import Vertical, Container, Grid, HorizontalGroup
 from textual import on
+from textual import events
 from textual.reactive import reactive
 from textual.screen import Screen
 import textual.validation as validator
@@ -27,11 +29,17 @@ from textual.widgets import (
 from textual.widgets.data_table import RowKey, ColumnKey
 
 from ..modals import *
-from ..widgets.editable_table import EditableDataTable, CellConfig
+from ..widgets import EditableDataTable, CellConfig, SimpleHeader
+
+# from ..widgets.editable_table import EditableDataTable, CellConfig
+# from ..widgets.simple_header import SimpleHeader
 from ..utils import generate_python
 
 from pysui import PysuiConfiguration
 from pysui.sui.sui_common.config.confgroup import ProfileGroup, Profile
+
+
+logger = logging.getLogger("config")
 
 
 class ConfigRow(Container):
@@ -49,6 +57,7 @@ class ConfigRow(Container):
         self, *children, name=None, id=None, classes=None, disabled=False, markup=True
     ):
         ConfigRow._CONFIG_ROWS.append(self)
+        logger.debug(f"Instantiating {id}")
         super().__init__(
             *children,
             name=name,
@@ -145,6 +154,9 @@ class ConfigRow(Container):
             f"Drop for '{row_name}' in {row_key} not implemented and active is {active_flag}."
         )
 
+    def show_popup(self, in_table: Optional[EditableDataTable] = None):
+        raise NotImplementedError(f"Event not handled.")
+
 
 class ConfigGroup(ConfigRow):
 
@@ -163,8 +175,20 @@ class ConfigGroup(ConfigRow):
         ),
     ]
 
+    def __init__(
+        self, *children, name=None, id=None, classes=None, disabled=False, markup=True
+    ):
+        super().__init__(
+            *children,
+            name=name,
+            id="group_row",
+            classes=classes,
+            disabled=disabled,
+            markup=markup,
+        )
+
     def compose(self):
-        with HorizontalGroup():
+        with HorizontalGroup(id="group_horizontal"):
             yield Button(
                 "Add",
                 compact=True,
@@ -186,7 +210,9 @@ class ConfigGroup(ConfigRow):
                 id="add_graphql_group",
                 disabled=True,
             )
-        yield EditableDataTable(self._CG_EDITS, disable_delete=False, id="config_group")
+        yield EditableDataTable(
+            self, self._CG_EDITS, disable_delete=False, id="group_table"
+        )
 
     def validate_group_name(self, table: EditableDataTable, in_value: str) -> bool:
         """Validate no rename collision."""
@@ -200,7 +226,7 @@ class ConfigGroup(ConfigRow):
 
     def on_mount(self) -> None:
         self.border_title = self.name
-        table: EditableDataTable = self.query_one("#config_group")
+        table: EditableDataTable = self.query_one("#group_table")
         self._CG_COLUMN_KEYS = table.add_columns(*self._CG_HEADER)
         self._CG_EDITS[0].validators = [
             validator.Length(minimum=3, maximum=32),
@@ -230,7 +256,7 @@ class ConfigGroup(ConfigRow):
             group (ProfileGroup): The PysuiConfiguration group being added
             make_active (bool): If this group should become the active group
         """
-        table: EditableDataTable = self.query_one("#config_group")
+        table: EditableDataTable = self.query_one("#group_table")
         self.configuration.model.add_group(group=group, make_active=make_active)
         number = table.row_count + 1
         label = Text(str(number), style="#B0FC38 italic")
@@ -387,7 +413,7 @@ class ConfigGroup(ConfigRow):
     def watch_configuration(self, cfg: PysuiConfiguration):
         """Called when a new configuration is selected."""
         if cfg:
-            table: EditableDataTable = self.query_one("#config_group")
+            table: EditableDataTable = self.query_one("#group_table")
             # Empty table
             table.clear()
             # Iterate group names and capture the active group
@@ -415,6 +441,9 @@ class ConfigGroup(ConfigRow):
                 self.configuration.model.get_group(group_name=gval)
             )
 
+    def show_popup(self, in_table: Optional[EditableDataTable] = None):
+        logger.debug(f"Config Group Event in table {in_table}.")
+
 
 class ConfigProfile(ConfigRow):
 
@@ -432,17 +461,29 @@ class ConfigProfile(ConfigRow):
         CellConfig("URL", True, True, [validator.URL()]),
     ]
 
+    def __init__(
+        self, *children, name=None, id=None, classes=None, disabled=False, markup=True
+    ):
+        super().__init__(
+            *children,
+            name=name,
+            id="profile_row",
+            classes=classes,
+            disabled=disabled,
+            markup=markup,
+        )
+
     def compose(self):
         yield Button(
             "Add", variant="primary", compact=True, id="add_profile", disabled=True
         )
         yield EditableDataTable(
-            self._CP_EDITS, disable_delete=False, id="config_profile"
+            self, self._CP_EDITS, disable_delete=False, id="profile_table"
         )
 
     def on_mount(self) -> None:
         self.border_title = self.name
-        table: EditableDataTable = self.query_one("#config_profile")
+        table: EditableDataTable = self.query_one("#profile_table")
         self._CP_COLUMN_KEYS = table.add_columns(*self._CP_HEADER)
         self._CP_EDITS[0].validators = [
             validator.Length(minimum=3, maximum=32),
@@ -464,7 +505,7 @@ class ConfigProfile(ConfigRow):
             AddProfile(self.configuration_group.profile_names)
         )
         if new_profile:
-            table: EditableDataTable = self.query_one("#config_profile")
+            table: EditableDataTable = self.query_one("#profile_table")
             prf = Profile(new_profile.name, new_profile.url)
             self.configuration_group.add_profile(
                 new_prf=prf, make_active=new_profile.active
@@ -544,7 +585,7 @@ class ConfigProfile(ConfigRow):
             self.configuration.save()
 
     def watch_configuration_group(self, cfg: ProfileGroup):
-        table: EditableDataTable = self.query_one("#config_profile")
+        table: EditableDataTable = self.query_one("#profile_table")
         # Empty table
         table.clear()
         self.border_title = self.name
@@ -570,6 +611,9 @@ class ConfigProfile(ConfigRow):
             # Select the active row/column
             table.move_cursor(row=active_row, column=0, scroll=True)
 
+    def show_popup(self, in_table: Optional[EditableDataTable] = None):
+        logger.debug(f"Config Profile Event in table {in_table}.")
+
 
 class ConfigIdentities(ConfigRow):
 
@@ -588,17 +632,29 @@ class ConfigIdentities(ConfigRow):
         CellConfig("Address", False),
     ]
 
+    def __init__(
+        self, *children, name=None, id=None, classes=None, disabled=False, markup=True
+    ):
+        super().__init__(
+            *children,
+            name=name,
+            id="identities_row",
+            classes=classes,
+            disabled=disabled,
+            markup=markup,
+        )
+
     def compose(self):
         yield Button(
             "Add", variant="primary", compact=True, disabled=True, id="add_identity"
         )
         yield EditableDataTable(
-            self._CI_EDITS, disable_delete=False, id="config_identities"
+            self, self._CI_EDITS, disable_delete=False, id="identity_table"
         )
 
     def on_mount(self) -> None:
         self.border_title = self.name
-        table: EditableDataTable = self.query_one("#config_identities")
+        table: EditableDataTable = self.query_one("#identity_table")
         self._CI_EDITS[0].validators = [
             validator.Length(minimum=3, maximum=64),
             validator.Function(
@@ -631,7 +687,7 @@ class ConfigIdentities(ConfigRow):
                 alias_list=alias_list,
             )
             # Update the table
-            table: EditableDataTable = self.query_one("#config_identities")
+            table: EditableDataTable = self.query_one("#identity_table")
             number = table.row_count + 1
             label = Text(str(number), style="#B0FC38 italic")
             table.add_row(
@@ -713,7 +769,7 @@ class ConfigIdentities(ConfigRow):
             self.configuration.save()
 
     def watch_configuration_group(self, cfg: ProfileGroup):
-        table: EditableDataTable = self.query_one("#config_identities")  # type: ignore
+        table: EditableDataTable = self.query_one("#identity_table")  # type: ignore
         # Empty table
         table.clear()
         self.border_title = self.name
@@ -744,6 +800,9 @@ class ConfigIdentities(ConfigRow):
                 )
             # Select the active row/column
             table.move_cursor(row=active_row, column=0, scroll=True)
+
+    def show_popup(self, in_table: Optional[EditableDataTable] = None):
+        logger.debug(f"Config Identities Event in table {in_table}.")
 
 
 class PyCfgScreen(Screen[None]):
@@ -809,10 +868,11 @@ class PyCfgScreen(Screen[None]):
             ("Profiles", ConfigProfile),
             ("Identities", ConfigIdentities),
         ]
-        super().__init__(name, id, classes)
+        super().__init__(name, "pysui_cfg", classes)
 
     def compose(self) -> ComposeResult:
-        yield Header(id="config-header")
+        yield SimpleHeader(id="config-header")
+        # yield Header(id="config-header")
         self.title = "Pysui Configuration: (ctrl+f to select)"
         with Grid(id="app-grid"):
             # yield ConfigSelection(id="config-list")
@@ -946,6 +1006,51 @@ class PyCfgScreen(Screen[None]):
 
     def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
         """Check if an action may run."""
-        if action in ["savecfg", "gensub", "edit"] and self.configuration is None:
+        if action in ["savecfg", "genstub", "edit"] and self.configuration is None:
             return None
         return True
+
+    @on(ButtonStatic.Pressed)
+    async def button_pressed(self, event: ButtonStatic.Pressed) -> None:
+        logger.debug(f"Received {event.button.id}")
+
+    @work()
+    async def main_popup(self, event: events.Click) -> None:
+        event.offset
+        self.app.push_screen(PopUpMenu(self, ["Fin", "Foo", "Bar"], event.offset))
+
+    def on_click(self, event: events.Click):
+        if event.button == 3:
+            event.stop()
+            wid: str = event.widget.id
+            logger.debug(f"Right mouse for {wid}. Event stopped.")
+            if wid:
+                # Direct on edit table
+                if wid.endswith("table"):
+                    owner: ConfigRow = event.widget.parent
+                    logger.debug(f"Table {wid} of {owner.id} with {self.configuration}")
+                    owner.show_popup(event.widget)
+                # Direct to profiles and identities
+                elif wid.endswith("row"):
+                    logger.debug(f"Widget id: {wid} context with {self.configuration}")
+                    event.widget.show_popup()
+                # Indirect to group
+                elif wid.endswith("horizontal"):
+                    owner: ConfigRow = event.widget.parent
+                    logger.debug(
+                        f"HorzBar id: {wid} of {owner.id} context with {self.configuration}"
+                    )
+                    owner.show_popup()
+            else:
+                # This is in our space
+                if event.widget.parent and event.widget.parent.id == "config-header":
+                    logger.debug(
+                        f"Header id: {event.widget.parent.id} context with {self.configuration}"
+                    )
+                    self.main_popup(event)
+                # No idea
+                else:
+                    owner = event.widget.parent if event.widget.parent else None
+                    logger.debug(
+                        f"No id:{type(event.widget)} on {owner} with {self.configuration}"
+                    )

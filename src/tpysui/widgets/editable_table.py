@@ -10,10 +10,11 @@ from typing import Optional, Callable, Iterable, Any
 
 from textual import work, events
 from textual.app import ComposeResult
+from textual.containers import Container
 from textual.coordinate import Coordinate
 from textual.geometry import Offset, Region
 from textual.message import Message
-from textual.screen import Screen, ModalScreen
+from textual.screen import ModalScreen
 import textual.validation as validator
 from textual.widgets import DataTable, Input, Pretty
 from textual.widgets.data_table import Row, ColumnKey, RowKey
@@ -160,8 +161,15 @@ class EditableDataTable(DataTable):
             self.table = table
             self.row_key = row_key
 
-    def __init__(self, edit_config: list[CellConfig], disable_delete: bool, **kwargs):
+    def __init__(
+        self,
+        owner: Container,
+        edit_config: list[CellConfig],
+        disable_delete: bool,
+        **kwargs,
+    ):
         super().__init__(**kwargs)
+        self.owner = owner
         self.delete_disabled = disable_delete
         self.delete_button = "[bold red]Delete"
         self.edit_config = edit_config
@@ -287,3 +295,9 @@ class EditableDataTable(DataTable):
             if active_coordinate:
                 self.move_cursor(row=active_coordinate.row, column=0)
         return active_coordinate.left()
+
+    def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
+        """Check if an action may run."""
+        if action in ["edit"] and self.row_count == 0:
+            return None
+        return True

@@ -284,7 +284,9 @@ class ConfigGroup(ConfigRow):
     ]
 
     def compose(self):
-        yield EditableDataTable(self._CG_EDITS, disable_delete=True, id="config_group")
+        yield EditableDataTable(
+            self, self._CG_EDITS, disable_delete=True, id="config_group"
+        )
 
     def validate_group_name(self, table: EditableDataTable, in_value: str) -> bool:
         """Validate that there is no same name collision."""
@@ -344,7 +346,7 @@ class ConfigProfile(ConfigRow):
             "Add", variant="primary", compact=True, id="add_profile", disabled=True
         )
         yield EditableDataTable(
-            self._CP_EDITS, disable_delete=False, id="config_profile"
+            self, self._CP_EDITS, disable_delete=False, id="config_profile"
         )
 
     def on_mount(self) -> None:
@@ -535,7 +537,7 @@ class ConfigIdentities(ConfigRow):
             "Add", variant="primary", compact=True, disabled=True, id="add_identity"
         )
         yield EditableDataTable(
-            self._CI_EDITS, disable_delete=False, id="config_identities"
+            self, self._CI_EDITS, disable_delete=False, id="config_identities"
         )
 
     def on_mount(self) -> None:

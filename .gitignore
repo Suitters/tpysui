@@ -9,6 +9,7 @@ __pycache__
 .pytest_cache
 .mypy_cache
 PysuiConfig.json
+tpysui.log
 
 temp_*.py
 

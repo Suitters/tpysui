@@ -8,14 +8,13 @@
 from functools import partial
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 from rich.text import Text
-from textual import work
+from textual import work, on, events
 from textual.app import ComposeResult
 from textual.coordinate import Coordinate
 from textual.containers import Vertical, Container, Grid, HorizontalGroup
-from textual import on
-from textual import events
+from textual.geometry import Offset
 from textual.reactive import reactive
 from textual.screen import Screen
 import textual.validation as validator
@@ -154,7 +153,9 @@ class ConfigRow(Container):
             f"Drop for '{row_name}' in {row_key} not implemented and active is {active_flag}."
         )
 
-    def show_popup(self, in_table: Optional[EditableDataTable] = None):
+    def show_popup(
+        self, event: events.Click, in_table: Optional[EditableDataTable] = None
+    ):
         raise NotImplementedError(f"Event not handled.")
 
 
@@ -277,17 +278,10 @@ class ConfigGroup(ConfigRow):
         self._update_button_state()
         self.config_group_change(self.configuration.active_group)
 
-    @on(Button.Pressed)
-    async def handle_button_pressed(self, event: Button.Pressed) -> None:
-        """Handle button presses for creating new groups.
-
-        Adding gRPC or GraphQL default groups only enabled if the
-        standard names don't already exist in the configuration.
-
-        Args:
-            event (Button.Pressed): The button pressed message
-        """
-        if event.button.id == "add_grpc_group":
+    @work()
+    async def standard_group(self, id: str):
+        """."""
+        if id == "add_grpc_group":
             self.insert_standard_group(
                 ProfileGroup(
                     PysuiConfiguration.SUI_GRPC_GROUP,
@@ -303,7 +297,7 @@ class ConfigGroup(ConfigRow):
                     ],
                 ),
             )
-        elif event.button.id == "add_graphql_group":
+        elif id == "add_graphql_group":
             self.insert_standard_group(
                 ProfileGroup(
                     PysuiConfiguration.SUI_GQL_RPC_GROUP,
@@ -323,6 +317,21 @@ class ConfigGroup(ConfigRow):
                     ],
                 )
             )
+
+    @on(Button.Pressed)
+    async def handle_button_pressed(self, event: Button.Pressed) -> None:
+        """Handle button presses for creating new groups.
+
+        Adding gRPC or GraphQL default groups only enabled if the
+        standard names don't already exist in the configuration.
+
+        Args:
+            event (Button.Pressed): The button pressed message
+        """
+        if event.button.id == "add_grpc_group":
+            self.standard_group("add_grpc_group")
+        elif event.button.id == "add_graphql_group":
+            self.standard_group("add_graphql_group")
         elif event.button.id == "add_group":
             self.add_group()
 
@@ -351,7 +360,7 @@ class ConfigGroup(ConfigRow):
                 self._insert_new_group(group=target_pgroup, make_active=True)
 
     @work()
-    async def add_group(self):
+    async def add_group(self, event: ButtonStatic.Pressed | None = None):
         new_group: NewGroup = await self.app.push_screen_wait(
             AddGroup(self.configuration.group_names())
         )
@@ -441,7 +450,36 @@ class ConfigGroup(ConfigRow):
                 self.configuration.model.get_group(group_name=gval)
             )
 
-    def show_popup(self, in_table: Optional[EditableDataTable] = None):
+    @work()
+    async def popup_add_grpc_group(self, event: ButtonStatic.Pressed):
+        logger.debug("Popup action...add gRPC group")
+        self.standard_group("add_grpc_group")
+
+    @work()
+    async def popup_add_gql_group(self, event: ButtonStatic.Pressed):
+        logger.debug("Popup action...add GraphQL group")
+        self.standard_group("add_graphql_group")
+
+    def show_popup(
+        self, event: events.Click, in_table: Optional[EditableDataTable] = None
+    ):
+        grpc_disabled = False
+        gql_disabled = False
+        if self.configuration:
+            gnames: list[str] = self.configuration.group_names()
+            grpc_disabled = PysuiConfiguration.SUI_GRPC_GROUP in gnames
+            gql_disabled = PysuiConfiguration.SUI_GQL_RPC_GROUP in gnames
+        else:
+            grpc_disabled = gql_disabled = True
+        action_list: list[MenuOption] = [
+            MenuOption("Add Group...", self.configuration is None, self.add_group),
+            MenuOption("Add gRPC Group...", grpc_disabled, self.popup_add_grpc_group),
+            MenuOption("Add GraphQL Group...", gql_disabled, self.popup_add_gql_group),
+        ]
+        pu_ofs: Offset = Offset(
+            x=self.offset.x + event.offset.x, y=self.content_region.y
+        )
+        self.app.push_screen(PopUpMenu(self, action_list, pu_ofs))
         logger.debug(f"Config Group Event in table {in_table}.")
 
 
@@ -611,7 +649,17 @@ class ConfigProfile(ConfigRow):
             # Select the active row/column
             table.move_cursor(row=active_row, column=0, scroll=True)
 
-    def show_popup(self, in_table: Optional[EditableDataTable] = None):
+    def show_popup(
+        self, event: events.Click, in_table: Optional[EditableDataTable] = None
+    ):
+        action_list: list[MenuOption] = [
+            MenuOption("Add Profile...", self.configuration is None, self.add_profile)
+        ]
+        pu_ofs: Offset = Offset(
+            x=self.offset.x + event.offset.x, y=self.content_region.y
+        )
+        self.app.push_screen(PopUpMenu(self, action_list, pu_ofs))
+
         logger.debug(f"Config Profile Event in table {in_table}.")
 
 
@@ -801,7 +849,16 @@ class ConfigIdentities(ConfigRow):
             # Select the active row/column
             table.move_cursor(row=active_row, column=0, scroll=True)
 
-    def show_popup(self, in_table: Optional[EditableDataTable] = None):
+    def show_popup(
+        self, event: events.Click, in_table: Optional[EditableDataTable] = None
+    ):
+        action_list: list[MenuOption] = [
+            MenuOption("Identities Popup", self.configuration is None, self.show_popup)
+        ]
+        pu_ofs: Offset = Offset(
+            x=self.offset.x + event.offset.x, y=self.content_region.y
+        )
+        self.app.push_screen(PopUpMenu(self, action_list, pu_ofs))
         logger.debug(f"Config Identities Event in table {in_table}.")
 
 
@@ -1003,15 +1060,21 @@ class PyCfgScreen(Screen[None]):
 
     @work()
     async def main_popup(self, event: events.Click) -> None:
-        a_list: list[str] = [
-            "Open Pysui Configuration...",
-            "New Pysui Configuration...",
+        a_list: list[MenuOption] = [
+            MenuOption(
+                "Open Pysui Configuration...", False, self.select_configuration_work
+            ),
+            MenuOption(
+                "New Pysui Configuration...", False, self.new_configuration_work
+            ),
+            MenuOption("Save As...", self.configuration is None, self.save_to_work),
+            MenuOption(
+                "Stub code from Configuration...",
+                self.configuration is None,
+                self.gen_to_work,
+            ),
         ]
-        c_list: list = [self.select_configuration_work, self.new_configuration_work]
-        if self.configuration:
-            a_list.extend(["Save As...", "Stub code from Configuration..."])
-            c_list.extend([self.save_to_work, self.gen_to_work])
-        self.app.push_screen(PopUpMenu(self, a_list, event.offset, c_list))
+        self.app.push_screen(PopUpMenu(self, a_list, event.offset))
 
     def on_key(self, event: events.Key) -> None:
         """Handles key events.
@@ -1038,23 +1101,26 @@ class PyCfgScreen(Screen[None]):
             event (events.Click): The mouse click event
         """
         if event.button == 3:
+
             event.stop()
             wid: str = event.widget.id
+            logger.debug(f"Have mouse {wid}")
             if wid:
                 # Direct on edit table
                 if wid.endswith("table"):
                     owner: ConfigRow = event.widget.parent
-                    owner.show_popup(event.widget)
+                    owner.show_popup(event, event.widget)
                 # Direct to profiles and identities
                 elif wid.endswith("row"):
-                    event.widget.show_popup()
+                    event.widget.show_popup(event)
                 # Indirect to group
                 elif wid.endswith("horizontal"):
                     owner: ConfigRow = event.widget.parent
-                    owner.show_popup()
+                    owner.show_popup(event)
             else:
                 # This is in our space
                 if event.widget.parent and event.widget.parent.id == "config-header":
+                    logger.debug("Main popup")
                     self.main_popup(event)
                 # No idea
                 else:

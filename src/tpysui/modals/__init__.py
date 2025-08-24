@@ -17,7 +17,7 @@ from .pyconfig_add import (
 )
 from .single_choice import SingleChoiceDialog
 from .pyconfig_new import NewConfiguration, NewConfig, InjectGroup, InjectConfig
-from .pyconfig_popup import PopUpMenu, ButtonStatic
+from .pyconfig_popup import PopUpMenu, ButtonStatic, MenuOption
 
 __all__ = [
     "ConfigSaver",
@@ -40,4 +40,5 @@ __all__ = [
     "InjectConfig",
     "PopUpMenu",
     "ButtonStatic",
+    "MenuOption",
 ]

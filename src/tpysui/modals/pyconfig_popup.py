@@ -7,17 +7,25 @@
 
 from __future__ import annotations
 from typing import Awaitable, Callable, Optional
+import dataclasses
 
 from textual import events, on
 from textual.app import ComposeResult
 from textual.color import Color
-from textual.containers import Container, Vertical
+from textual.containers import Vertical
 from textual.geometry import Offset
 from textual.message import Message
 from textual.screen import ModalScreen
 from textual.visual import VisualType
 from textual.widget import Widget
 from textual.widgets import Static
+
+
+@dataclasses.dataclass
+class MenuOption:
+    title: str
+    disabled: bool
+    callback: Callable[[ButtonStatic.Pressed], Awaitable[None]]
 
 
 class NoSelectStatic(Static):
@@ -108,42 +116,48 @@ class PopUpMenu(ModalScreen[str | None]):
     def __init__(
         self,
         owner: Widget,
-        action_list: list[str],
+        action_list: list[MenuOption],
         menu_offset: Offset,
-        callback_list: Optional[
-            Callable[[ButtonStatic.Pressed], Awaitable[None]]
-        ] = None,
     ):
         super().__init__()
-        self.action_list = action_list
+        self.action_list: list[MenuOption] = action_list
         self.owner = owner
         self.selected = None
         self.menu_offset = menu_offset
-        if callback_list and len(callback_list) != len(action_list):
-            raise ValueError("Callback list length must be equal to action_list")
-        self.callback_list = callback_list
+        self.button_statics: list[ButtonStatic] = []
 
     def compose(self) -> ComposeResult:
         with Vertical(id="menu_container"):
+            action: MenuOption
             for index, action in enumerate(self.action_list):
-                yield ButtonStatic(action, position_index=index)
+                b_st: ButtonStatic = ButtonStatic(
+                    action.title, position_index=index, disabled=action.disabled
+                )
+                self.button_statics.append(b_st)
+                yield b_st
 
     def on_mount(self) -> None:
         y_offset = self.menu_offset.y
         if y_offset == 0:
             y_offset += 1
         menu: Vertical = self.query_one("#menu_container", Vertical)
-        menu.styles.width = len(max(self.action_list, key=len)) + 2
+        max_len = max(self.action_list, key=lambda item: len(item.title))
+        menu.styles.width = len(max_len.title) + 2
         menu.styles.height = len(self.action_list)
         menu.offset = Offset(self.menu_offset.x, y_offset)
-        menu.styles.background = Color.parse("blue")
+        # menu.styles.background = Color.parse("blue")
+        for b_st in self.button_statics:
+            if b_st.disabled:
+                b_st.styles.color = Color.parse("gray")
+            else:
+                b_st.styles.color = Color.parse("green")
 
     @on(ButtonStatic.Pressed)
     async def button_pressed(self, event: ButtonStatic.Pressed) -> None:
         if event.button.position_index >= 0:
-            if self.callback_list:
-                fn = self.callback_list[event.button.position_index]
-                fn(event)
+            if self.action_list:
+                mi: MenuOption = self.action_list[event.button.position_index]
+                mi.callback(event)
             else:
                 self.owner.post_message(event)
             self.dismiss(None)

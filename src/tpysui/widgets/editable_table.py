@@ -5,6 +5,7 @@
 
 """Customized widgets for App."""
 import dataclasses
+import logging
 from typing import Optional, Callable, Iterable, Any
 
 
@@ -19,7 +20,9 @@ import textual.validation as validator
 from textual.widgets import DataTable, Input, Pretty
 from textual.widgets.data_table import Row, ColumnKey, RowKey
 
-from ..modals import OkPopup
+from ..modals import OkPopup, MenuOption, PopUpMenu, ButtonStatic
+
+logger = logging.getLogger("edittable")
 
 
 class EditWidgetScreen(ModalScreen):
@@ -106,7 +109,7 @@ class EditWidgetScreen(ModalScreen):
         indicate that the cell should _not_ be updated.
         """
         try:
-            if not event.validation_result.is_valid:
+            if event.validation_result and not event.validation_result.is_valid:
                 self.query_one(Pretty).update(
                     event.validation_result.failure_descriptions
                 )
@@ -180,6 +183,8 @@ class EditableDataTable(DataTable):
         if not self.delete_disabled:
             self.delete_column = len(keys)
             super().add_column("", key="delete")
+        else:
+            self.delete_column = None
         return keys
 
     def add_row(self, *cells, height=1, key=None, label=None) -> RowKey:
@@ -193,23 +198,31 @@ class EditableDataTable(DataTable):
         if event.value == self.delete_button:
             self.post_message(self.RowDelete(event.data_table, event.cell_key.row_key))
 
+    def action_edit_dispatch(self) -> None:
+        """Determine which way to go for edit."""
+        coords = self.cursor_coordinate
+        # Avoid the 'delete' button
+        if not self.delete_column or coords.column != self.delete_column:
+            edit_cfg = self.edit_config[coords.column]
+            if edit_cfg.editable == False:
+                return
+            if edit_cfg.field_name == "Active" and self.row_count == 1:
+                self.app.push_screen(
+                    OkPopup("[red]Can not change Active state for only row")
+                )
+            else:
+                if edit_cfg.inline:
+                    self.edit_cell(coordinate=coords, cfg=edit_cfg)
+                elif edit_cfg.dialog:
+                    self.edit_dialog(coordinate=coords, cfg=edit_cfg)
+
     async def action_edit(self) -> None:
-        if self.ordered_rows:
-            coords = self.cursor_coordinate
-            # Avoid the 'delete' button
-            if coords.column != self.delete_column:
-                edit_cfg = self.edit_config[coords.column]
-                if edit_cfg.editable == False:
-                    return
-                if edit_cfg.field_name == "Active" and self.row_count == 1:
-                    self.app.push_screen(
-                        OkPopup("[red]Can not change Active state for only row")
-                    )
-                else:
-                    if edit_cfg.inline:
-                        self.edit_cell(coordinate=coords, cfg=edit_cfg)
-                    elif edit_cfg.dialog:
-                        self.edit_dialog(coordinate=coords, cfg=edit_cfg)
+        """Handle When ctrl+e is pressed."""
+        self.action_edit_dispatch()
+
+    def handle_pu_edit(self, event: ButtonStatic.Pressed | None = None) -> None:
+        """Callback from popup window to edit cell."""
+        self.action_edit_dispatch()
 
     @work()
     async def edit_dialog(self, coordinate: Coordinate, cfg: CellConfig) -> None:
@@ -301,3 +314,56 @@ class EditableDataTable(DataTable):
         if action in ["edit"] and self.row_count == 0:
             return None
         return True
+
+    def handle_pu_delete(self, event: ButtonStatic.Pressed | None = None) -> None:
+        row_key = self._row_locations.get_key(self.cursor_row)
+        self.post_message(self.RowDelete(self, row_key))
+
+    @work
+    async def pop_up(self, coords: Coordinate):
+        logger.debug(f"In edittable right mouse click response of {self.owner.id}")
+        name = self.get_cell_at(Coordinate(coords.row, 0))
+        value = self.get_cell_at(coords) if coords.column != 1 else "Active"
+        can_edit = self.owner.id == "identities_row" and coords.column > 1
+        can_delete = self.owner.id == "group_row" and len(self.ordered_rows) <= 1
+        can_duplicate = self.owner.id == "identities_row"
+        action_list: list[MenuOption] = [
+            MenuOption(f"Edit '{value}'...", can_edit, self.handle_pu_edit),
+            # MenuOption(f"Duplicate '{name}'...", can_duplicate, self.pop_up),
+            MenuOption(f"Delete '{name}' row...", can_delete, self.handle_pu_delete),
+        ]
+        # region = self._get_cell_region(coords)
+        region = self._get_cell_region(Coordinate(row=0, column=0))
+        # the region containing the cell contents, without padding
+        contents_region = Region(
+            region.x + self.cell_padding,
+            region.y,
+            region.width - 2 * self.cell_padding,
+            region.height,
+        )
+        absolute_offset = self.screen.get_offset(self)
+        absolute_region = contents_region.translate(absolute_offset)
+
+        pu_ofs = Offset(
+            coords.column + absolute_region.x, coords.row + absolute_region.y
+        )
+        self.app.push_screen(PopUpMenu(self, action_list, pu_ofs))
+
+    def on_click(self, event: events.Click):
+        """Handles mouse events, specifically watching for right mouse click.
+
+        Args:
+            event (events.Click): The mouse click event
+        """
+        if event.button == 3 and self.ordered_rows:
+            meta = event.style.meta
+            if "row" not in meta or "column" not in meta:
+                return
+            row_index = meta["row"]
+            column_index = meta["column"]
+            coords = Coordinate(row_index, column_index)
+            value = self.get_cell_at(coords)
+            logger.debug(
+                f"Right-clicked on cell at row {row_index}, column {column_index}: {value}"
+            )
+            self.pop_up(coords)

@@ -36,7 +36,7 @@ Create new config (ctrl+n)
 ------------------------------------
 This is only available in PysuiConfiguration management.
 
-If you are a first time user of ``pysui`` then you will want
+If you are a first time user of ``pysui`` then you may want
 to choose this option.
 
 Select an existing configuration (ctrl+f)
@@ -57,15 +57,18 @@ This option is available after creating or loading a PysuiConfig.json file.
 Adds, Edits, Deletes
 --------------------
 
-Add Button
-**********
-The Add button over each section, when clicked, will popup a relevant
-dialog box (i.e. Add Group, Add Profile, Add Identity).
-
-Add gRPC Group
-^^^^^^^^^^^^^^
+Add Table Entry (ctrl+a)
+************************
 PysuiConfiguration only!
-Note: This button is disabled if said group already exists.
+
+With a loaded configuration, this will add a new entry (row in table) based
+on where the focus is between Group, Profile and Identity.
+A relevant dialog box for the entry type will pop up.
+
+Add gRPC Group (ctrl+r)
+^^^^^^^^^^^^^^^^^^^^^^^
+PysuiConfiguration only! Note: This button is disabled if said group
+already exists.
 
 This will add a group: ``sui_grpc_config`` with standard
 Mysten gRPC profiles (URLS).
@@ -74,10 +77,10 @@ If there are other groups that have identities, a popup will
 ask if you want to copy identities from one of them. Otherwise,
 you will need to add Identities for addresses/keys.
 
-Add GraphQL Group
-^^^^^^^^^^^^^^^^^
-PysuiConfiguration only!
-Note: This button is disabled if said group already exists.
+Add GraphQL Group (ctrl+l)
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+PysuiConfiguration only! Note: This button is disabled if said group
+already exists.
 
 This will add a group: ``sui_gql_config`` with standard
 Mysten GraphQL profiles (URLS).
@@ -86,13 +89,13 @@ If there are other groups that have identities, a popup will
 ask if you want to copy identities from one of them. Otherwise,
 you will need to add Identities for addresses/keys.
 
-Adding Identities
-^^^^^^^^^^^^^^^^^
+Note about Identities
+^^^^^^^^^^^^^^^^^^^^^
 The dialog supports generating identies for ED25199, SECP256k1 or SECP256r1
 
 
-Field Edits
-***********
+Field Edits (ctrl+e)
+********************
 Selecting a field in any table and then pressing ``ctrl+e`` keys allows
 you to change that field.
 
@@ -112,11 +115,14 @@ You can change the Alias or Active status.
 
 Delete Rows
 ***********
-Each rown in each section has a ``Delete`` option. Clicking it will
-remove the entire row and any relateded content. For example, deleting
-a Group will delete all the Profiles and Identities that belong to it.
+With a row in focs, right clicking will popup options to edit the highlighted
+cell or delete the row.
 
-Deleting the only row in a section is prevented.
+Deleting a row in the Group section will remove the entire row and any
+relateded content. For example, deleting a Group will delete all
+the Profiles and Identities that belong to it.
+
+Deleting the only row in the Group section is not allowed.
 
 Quitting ``tpysui`` (ctrl+q)
 ----------------------------

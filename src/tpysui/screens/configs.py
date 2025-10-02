@@ -40,6 +40,10 @@ from pysui.sui.sui_common.config.confgroup import ProfileGroup, Profile
 
 logger = logging.getLogger("config")
 
+_ADD_NEW_TYPE: str = "ctrl+a"
+_ADD_GRAPHQL_GROUP: str = "ctrl+l"
+_ADD_GRPRC_GROUP: str = "ctrl+r"
+
 
 class ConfigRow(Container):
     """Base configuration container class."""
@@ -85,20 +89,7 @@ class ConfigRow(Container):
             else config_path
         )
         pysuicfg = PysuiConfiguration(from_cfg_path=str(cpath))
-        for index, row in enumerate(cls._CONFIG_ROWS):
-            if index == 0:
-                gnames: list[str] = pysuicfg.group_names()
-                for idx, rb in enumerate(row.query("Button").nodes):
-                    if idx == 0:
-                        rb.disabled = False
-                    elif idx == 1 and PysuiConfiguration.SUI_GRPC_GROUP not in gnames:
-                        rb.disabled = False
-                    elif (
-                        idx == 2 and PysuiConfiguration.SUI_GQL_RPC_GROUP not in gnames
-                    ):
-                        rb.disabled = False
-            else:
-                row.query_one("Button").disabled = False
+        for row in cls._CONFIG_ROWS:
             row.configuration = pysuicfg
 
     @classmethod
@@ -132,7 +123,7 @@ class ConfigRow(Container):
 
     @work
     async def remove_row(self, data_table: EditableDataTable, row_key: RowKey) -> None:
-        row_values = [str(value) for value in data_table.get_row(row_key)[:-1]]
+        row_values = [str(value) for value in data_table.get_row(row_key)]
         confirmed = await self.app.push_screen_wait(
             ConfirmDeleteRowDialog(
                 f"Are you sure you want to delete this row:\n[green]{row_values[0]}"
@@ -156,7 +147,11 @@ class ConfigRow(Container):
     def show_popup(
         self, event: events.Click, in_table: Optional[EditableDataTable] = None
     ):
-        raise NotImplementedError(f"Event not handled.")
+        raise NotImplementedError(f"show_popup event not handled.")
+
+    def new_type_row(self, from_keys: str | None = None) -> None:
+        """Faux abstraction for adding new row of Configuration type."""
+        raise NotImplementedError(f"new_type_row not handled.")
 
 
 class ConfigGroup(ConfigRow):
@@ -189,30 +184,8 @@ class ConfigGroup(ConfigRow):
         )
 
     def compose(self):
-        with HorizontalGroup(id="group_horizontal"):
-            yield Button(
-                "Add",
-                compact=True,
-                variant="primary",
-                id="add_group",
-                disabled=True,
-            )
-            yield Button(
-                "Add gRPC Group",
-                compact=True,
-                variant="primary",
-                id="add_grpc_group",
-                disabled=True,
-            )
-            yield Button(
-                "Add GraphQL Group",
-                compact=True,
-                variant="primary",
-                id="add_graphql_group",
-                disabled=True,
-            )
         yield EditableDataTable(
-            self, self._CG_EDITS, disable_delete=False, id="group_table"
+            self, self._CG_EDITS, disable_delete=True, id="group_table"
         )
 
     def validate_group_name(self, table: EditableDataTable, in_value: str) -> bool:
@@ -236,19 +209,6 @@ class ConfigGroup(ConfigRow):
             ),
         ]
         table.focus()
-
-    def _update_button_state(self):
-        gnames: list[str] = self.configuration.group_names()
-        grpc_b = self.query_one("#add_grpc_group", Button)
-        if PysuiConfiguration.SUI_GRPC_GROUP in gnames:
-            grpc_b.disabled = True
-        else:
-            grpc_b.disabled = False
-        graphql_b = self.query_one("#add_graphql_group", Button)
-        if PysuiConfiguration.SUI_GQL_RPC_GROUP in gnames:
-            graphql_b.disabled = True
-        else:
-            graphql_b.disabled = False
 
     def _insert_new_group(self, group: ProfileGroup, make_active: bool):
         """Insert a group into the current configuraiton and update UI.
@@ -275,13 +235,12 @@ class ConfigGroup(ConfigRow):
                 set_focus=True,
             )
         self.configuration.save()
-        self._update_button_state()
         self.config_group_change(self.configuration.active_group)
 
     @work()
     async def standard_group(self, id: str):
         """."""
-        if id == "add_grpc_group":
+        if id == _ADD_GRPRC_GROUP:
             self.insert_standard_group(
                 ProfileGroup(
                     PysuiConfiguration.SUI_GRPC_GROUP,
@@ -294,10 +253,12 @@ class ConfigGroup(ConfigRow):
                         Profile("devnet", "fullnode.devnet.sui.io:443"),
                         Profile("testnet", "fullnode.testnet.sui.io:443"),
                         Profile("mainnet", "fullnode.mainnet.sui.io:443"),
+                        Profile("testnet-archive", "archive.testnet.sui.io:443"),
+                        Profile("mainnet-archive", "archive.mainnet.sui.io:443"),
                     ],
                 ),
             )
-        elif id == "add_graphql_group":
+        elif id == _ADD_GRAPHQL_GROUP:
             self.insert_standard_group(
                 ProfileGroup(
                     PysuiConfiguration.SUI_GQL_RPC_GROUP,
@@ -307,33 +268,12 @@ class ConfigGroup(ConfigRow):
                     [],
                     [],
                     [
-                        Profile("devnet", "https://sui-devnet.mystenlabs.com/graphql"),
-                        Profile(
-                            "testnet", "https://sui-testnet.mystenlabs.com/graphql"
-                        ),
-                        Profile(
-                            "mainnet", "https://sui-mainnetnet.mystenlabs.com/graphql"
-                        ),
+                        Profile("devnet", "https://graphql.devnet.sui.io/graphql"),
+                        Profile("testnet", "https://graphql.testnet.sui.io/graphql"),
+                        Profile("mainnet", "https://graphql.mainnet.sui.io/graphql"),
                     ],
                 )
             )
-
-    @on(Button.Pressed)
-    async def handle_button_pressed(self, event: Button.Pressed) -> None:
-        """Handle button presses for creating new groups.
-
-        Adding gRPC or GraphQL default groups only enabled if the
-        standard names don't already exist in the configuration.
-
-        Args:
-            event (Button.Pressed): The button pressed message
-        """
-        if event.button.id == "add_grpc_group":
-            self.standard_group("add_grpc_group")
-        elif event.button.id == "add_graphql_group":
-            self.standard_group("add_graphql_group")
-        elif event.button.id == "add_group":
-            self.add_group()
 
     @work()
     async def insert_standard_group(self, target_pgroup: ProfileGroup):
@@ -368,6 +308,18 @@ class ConfigGroup(ConfigRow):
             prf_grp = ProfileGroup(new_group.name, "", "", [], [], [], [])
             self._insert_new_group(group=prf_grp, make_active=new_group.active)
 
+    def new_type_row(self, from_keys: str | None = None):
+        """Add new Group row of Configuration type."""
+        if from_keys == _ADD_NEW_TYPE:
+            logger.debug("Add new Group")
+            self.add_group()
+        elif from_keys == _ADD_GRPRC_GROUP:
+            logger.debug("Add gRPC new Group")
+            self.standard_group(_ADD_GRPRC_GROUP)
+        elif from_keys == _ADD_GRAPHQL_GROUP:
+            logger.debug("Add GraphQL new Group")
+            self.standard_group(_ADD_GRAPHQL_GROUP)
+
     def dropping_row(
         self,
         from_table: EditableDataTable,
@@ -387,8 +339,6 @@ class ConfigGroup(ConfigRow):
                 grp_change: ProfileGroup = self.configuration.active_group
             # Delete from table
             from_table.remove_row(row_key)
-            # Update add buttons
-            self._update_button_state()
             # Save PysuiConfig
             self.configuration.save()
             if grp_change:
@@ -415,7 +365,6 @@ class ConfigGroup(ConfigRow):
                 gname = str(cell.table.get_cell_at(new_coord))
                 self.configuration.model.group_active = gname
                 group = self.configuration.model.get_group(group_name=gname)
-            self._update_button_state()
             self.configuration.save()
             self.config_group_change(group)
 
@@ -453,34 +402,42 @@ class ConfigGroup(ConfigRow):
     @work()
     async def popup_add_grpc_group(self, event: ButtonStatic.Pressed):
         logger.debug("Popup action...add gRPC group")
-        self.standard_group("add_grpc_group")
+        self.standard_group(_ADD_GRPRC_GROUP)
 
     @work()
     async def popup_add_gql_group(self, event: ButtonStatic.Pressed):
         logger.debug("Popup action...add GraphQL group")
-        self.standard_group("add_graphql_group")
+        self.standard_group(_ADD_GRAPHQL_GROUP)
 
     def show_popup(
-        self, event: events.Click, in_table: Optional[EditableDataTable] = None
+        self, event: events.Click, in_table: EditableDataTable | None = None
     ):
-        grpc_disabled = False
-        gql_disabled = False
-        if self.configuration:
-            gnames: list[str] = self.configuration.group_names()
-            grpc_disabled = PysuiConfiguration.SUI_GRPC_GROUP in gnames
-            gql_disabled = PysuiConfiguration.SUI_GQL_RPC_GROUP in gnames
+        if not in_table:
+            grpc_disabled = False
+            gql_disabled = False
+            if self.configuration:
+                gnames: list[str] = self.configuration.group_names()
+                grpc_disabled = PysuiConfiguration.SUI_GRPC_GROUP in gnames
+                gql_disabled = PysuiConfiguration.SUI_GQL_RPC_GROUP in gnames
+            else:
+                grpc_disabled = gql_disabled = True
+            action_list: list[MenuOption] = [
+                MenuOption("Add Group...", self.configuration is None, self.add_group),
+                MenuOption(
+                    "Add gRPC Group...", grpc_disabled, self.popup_add_grpc_group
+                ),
+                MenuOption(
+                    "Add GraphQL Group...", gql_disabled, self.popup_add_gql_group
+                ),
+            ]
+            pu_ofs: Offset = Offset(
+                x=self.offset.x + event.offset.x, y=self.content_region.y
+            )
+            self.app.push_screen(PopUpMenu(self, action_list, pu_ofs))
+            logger.debug(f"Config Group Event in table {in_table}.")
         else:
-            grpc_disabled = gql_disabled = True
-        action_list: list[MenuOption] = [
-            MenuOption("Add Group...", self.configuration is None, self.add_group),
-            MenuOption("Add gRPC Group...", grpc_disabled, self.popup_add_grpc_group),
-            MenuOption("Add GraphQL Group...", gql_disabled, self.popup_add_gql_group),
-        ]
-        pu_ofs: Offset = Offset(
-            x=self.offset.x + event.offset.x, y=self.content_region.y
-        )
-        self.app.push_screen(PopUpMenu(self, action_list, pu_ofs))
-        logger.debug(f"Config Group Event in table {in_table}.")
+            logger.debug(f"Forwarding to {in_table.id}")
+            in_table.pop_up(event)
 
 
 class ConfigProfile(ConfigRow):
@@ -496,7 +453,7 @@ class ConfigProfile(ConfigRow):
             None,
             partial(SingleChoiceDialog, "Switch State", "Change Active", ["Yes", "No"]),
         ),
-        CellConfig("URL", True, True, [validator.URL()]),
+        CellConfig("URL", True, True),  # , [validator.URL()]
     ]
 
     def __init__(
@@ -512,11 +469,8 @@ class ConfigProfile(ConfigRow):
         )
 
     def compose(self):
-        yield Button(
-            "Add", variant="primary", compact=True, id="add_profile", disabled=True
-        )
         yield EditableDataTable(
-            self, self._CP_EDITS, disable_delete=False, id="profile_table"
+            self, self._CP_EDITS, disable_delete=True, id="profile_table"
         )
 
     def on_mount(self) -> None:
@@ -530,15 +484,8 @@ class ConfigProfile(ConfigRow):
             ),
         ]
 
-    @on(Button.Pressed, "#add_profile")
-    async def on_add_profile(self, event: Button.Pressed) -> None:
-        """
-        Return the user's choice back to the calling application and dismiss the dialog
-        """
-        self.add_profile()
-
     @work()
-    async def add_profile(self):
+    async def add_profile(self, event: ButtonStatic.Pressed | None = None):
         new_profile: NewProfile = await self.app.push_screen_wait(
             AddProfile(self.configuration_group.profile_names)
         )
@@ -562,6 +509,12 @@ class ConfigProfile(ConfigRow):
                     set_focus=True,
                 )
             self.configuration.save()
+
+    def new_type_row(self, from_keys: str | None = None):
+        """Add new Profile row of Configuration type."""
+        if from_keys == _ADD_NEW_TYPE:
+            logger.debug("Add new Profile")
+            self.add_profile()
 
     def dropping_row(
         self,
@@ -693,11 +646,8 @@ class ConfigIdentities(ConfigRow):
         )
 
     def compose(self):
-        yield Button(
-            "Add", variant="primary", compact=True, disabled=True, id="add_identity"
-        )
         yield EditableDataTable(
-            self, self._CI_EDITS, disable_delete=False, id="identity_table"
+            self, self._CI_EDITS, disable_delete=True, id="identity_table"
         )
 
     def on_mount(self) -> None:
@@ -711,15 +661,14 @@ class ConfigIdentities(ConfigRow):
         ]
         self._CI_COLUMN_KEYS = table.add_columns(*self._CI_HEADER)
 
-    @on(Button.Pressed, "#add_identity")
-    async def on_add_profile(self, event: Button.Pressed) -> None:
-        """
-        Return the user's choice back to the calling application and dismiss the dialog
-        """
-        self.add_identity()
+    def new_type_row(self, from_keys: str | None = None):
+        """Add new Identify row of Configuration type."""
+        if from_keys == _ADD_NEW_TYPE:
+            logger.debug("Add new Identity")
+            self.add_identity()
 
     @work()
-    async def add_identity(self):
+    async def add_identity(self, event: ButtonStatic.Pressed | None = None):
         alias_list = [x.alias for x in self.configuration_group.alias_list]
         new_ident: NewIdentity | None = await self.app.push_screen_wait(
             AddIdentity(alias_list)
@@ -853,7 +802,7 @@ class ConfigIdentities(ConfigRow):
         self, event: events.Click, in_table: Optional[EditableDataTable] = None
     ):
         action_list: list[MenuOption] = [
-            MenuOption("Identities Popup", self.configuration is None, self.show_popup)
+            MenuOption("Add Identity...", self.configuration is None, self.add_identity)
         ]
         pu_ofs: Offset = Offset(
             x=self.offset.x + event.offset.x, y=self.content_region.y
@@ -1076,23 +1025,66 @@ class PyCfgScreen(Screen[None]):
         ]
         self.app.push_screen(PopUpMenu(self, a_list, event.offset))
 
+    def _determine_owner_from_key_event(self, event: events.Key) -> ConfigRow | None:
+        """Determine focus (if any)"""
+        parent = None
+        if self.configuration and self.focused:
+            if self.focused.id == "group_table":
+                logger.debug(f"Group action to {self.focused.parent.id}")
+                parent = self.focused.parent
+            elif self.focused.id == "profile_table":
+                logger.debug(f"Profile action to {self.focused.parent.id}")
+                parent = self.focused.parent
+            elif self.focused.id == "identity_table":
+                logger.debug(f"Identity action to {self.focused.parent.id}")
+                parent = self.focused.parent
+        return parent
+
     def on_key(self, event: events.Key) -> None:
         """Handles key events.
 
         Args:
             event (events.Key): They keyboard event
         """
-        match event.key:
-            case "ctrl+f":
-                self.select_configuration_work()
-            case "ctrl+n":
-                self.new_configuration_work()
-            case "ctrl+s":
-                if self.configuration:
-                    self.save_to_work()
-            case "ctrl+g":
-                if self.configuration:
-                    self.gen_to_work()
+        if event.key == "ctrl+f":
+            self.select_configuration_work()
+        elif event.key == "ctrl+n":
+            self.new_configuration_work()
+        elif event.key == "ctrl+s":
+            if self.configuration:
+                self.save_to_work()
+        elif event.key == "ctrl+g":
+            if self.configuration:
+                self.gen_to_work()
+        elif event.key == _ADD_NEW_TYPE:
+            logger.debug(f"{_ADD_NEW_TYPE} cfg:{self.configuration is not None}")
+            parent = self._determine_owner_from_key_event(event)
+            if parent:
+                parent.new_type_row(event.key)
+        elif event.key == _ADD_GRPRC_GROUP:
+            logger.debug(f"ctrl+r (add gRPC) cfg:{self.configuration is not None}")
+            parent = self._determine_owner_from_key_event(event)
+            if (
+                isinstance(parent, ConfigGroup)
+                and PysuiConfiguration.SUI_GQL_RPC_GROUP
+                not in parent.configuration.group_names()
+            ):
+                logger.debug(f"Add gRPC valid for {parent.id}")
+                parent.new_type_row(event.key)
+            else:
+                logger.debug(f"No action on {parent.id}")
+        elif event.key == _ADD_GRAPHQL_GROUP:
+            logger.debug(f"ctrl+l (add gql) cfg:{self.configuration is not None}")
+            parent = self._determine_owner_from_key_event(event)
+            if (
+                isinstance(parent, ConfigGroup)
+                and PysuiConfiguration.SUI_GRPC_GROUP
+                not in parent.configuration.group_names()
+            ):
+                logger.debug(f"Add GraphQL valid for {parent.id}")
+                parent.new_type_row(event.key)
+            else:
+                logger.debug(f"No action on {parent.id}")
 
     def on_click(self, event: events.Click):
         """Handles mouse events, specifically watching for right mouse click.
@@ -1102,16 +1094,20 @@ class PyCfgScreen(Screen[None]):
         """
         if event.button == 3:
 
-            event.stop()
             wid: str = event.widget.id
+            if wid and wid.endswith("table"):
+                return
+                owner: ConfigRow = event.widget.parent
+                owner.show_popup(event, event.widget)
             logger.debug(f"Have mouse {wid}")
+            event.stop()
             if wid:
                 # Direct on edit table
-                if wid.endswith("table"):
-                    owner: ConfigRow = event.widget.parent
-                    owner.show_popup(event, event.widget)
+                # if wid.endswith("table"):
+                #     owner: ConfigRow = event.widget.parent
+                #     owner.show_popup(event, event.widget)
                 # Direct to profiles and identities
-                elif wid.endswith("row"):
+                if wid.endswith("row"):
                     event.widget.show_popup(event)
                 # Indirect to group
                 elif wid.endswith("horizontal"):

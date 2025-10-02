@@ -101,13 +101,14 @@ class PopUpMenu(ModalScreen[str | None]):
     }                       /* Which we need for the absolute offset to work */
     #menu_container {
         background: $surface;        
-        # width: 10; height: 3;                   
+        height: auto;        
+        # width: 10; height: 3;                           
         border-left: wide $panel;
         border-right: wide $panel;                
         &.bottom { border-top: hkey $panel; }
         &.top { border-bottom: hkey $panel; }
-        & > ButtonStatic {
-            &:hover { background: $panel-lighten-2; }
+        & > ButtonStatic {                        
+            &:hover { background: $panel-lighten-1; }
             &.pressed { background: $primary; }        
         }
     }
@@ -144,13 +145,14 @@ class PopUpMenu(ModalScreen[str | None]):
         max_len = max(self.action_list, key=lambda item: len(item.title))
         menu.styles.width = len(max_len.title) + 2
         menu.styles.height = len(self.action_list)
+        # menu.styles.border = ("heavy", "white")
         menu.offset = Offset(self.menu_offset.x, y_offset)
-        # menu.styles.background = Color.parse("blue")
+        menu.styles.background = Color.parse("blue")
         for b_st in self.button_statics:
             if b_st.disabled:
                 b_st.styles.color = Color.parse("gray")
             else:
-                b_st.styles.color = Color.parse("green")
+                b_st.styles.color = Color.parse("white")
 
     @on(ButtonStatic.Pressed)
     async def button_pressed(self, event: ButtonStatic.Pressed) -> None:

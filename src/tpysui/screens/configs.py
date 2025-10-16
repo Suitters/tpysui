@@ -283,6 +283,8 @@ class ConfigGroup(ConfigRow):
             if agrp.key_list:
                 from_group.append(gname)
 
+        # If there are groups with keys, pop-up to select optioanl
+        # key copy from specific group
         if from_group:
             igrp: InjectConfig
             if igrp := await self.app.push_screen_wait(
@@ -297,7 +299,7 @@ class ConfigGroup(ConfigRow):
                     target_pgroup.address_list = kgroup.address_list
                     target_pgroup.using_address = kgroup.using_address
 
-                self._insert_new_group(group=target_pgroup, make_active=True)
+        self._insert_new_group(group=target_pgroup, make_active=True)
 
     @work()
     async def add_group(self, event: ButtonStatic.Pressed | None = None):

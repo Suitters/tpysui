@@ -9,7 +9,7 @@
             "type": "debugpy",
             "request": "launch",
             "module": "src.tpysui.tpysui",
-            "justMyCode": true
+            "justMyCode": false
         },
         {
             "name": "mre",

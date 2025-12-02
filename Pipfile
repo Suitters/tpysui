@@ -10,6 +10,7 @@ twine = "*"
 build = "*"
 pip = "*"
 textual = "*"
+textual-dev = "*"
 pysui = "*"
 
 [dev-packages]

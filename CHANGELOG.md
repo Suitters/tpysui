@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - Unpublished
+
+### Added
+
+### Fixed
+
+### Changed
+
+- bumped Textual to 6.7.1
+- bumped pysui dependency range
+
+### Removed
+
 ## [0.4.1] - 2025-10-16
 
 ### Added

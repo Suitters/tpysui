@@ -1,0 +1,45 @@
+ActiveStateBar {
+    height: 3;
+    background: $surface;
+    border-bottom: solid $primary;
+}
+
+#main-row {
+    height: 1fr;
+}
+
+#sidebar {
+    width: 30;
+    border-right: solid $primary;
+    background: $panel;
+}
+
+#content {
+    width: 1fr;
+    height: 100%;
+}
+
+#screen-config, #screen-reads, #screen-writes, #screen-tx, #screen-uci {
+    width: 1fr;
+    height: 100%;
+}
+
+/* Unfocused DataTable: hide the blurred cursor entirely */
+DataTable > .datatable--cursor {
+    background: transparent;
+    color: $text;
+    text-style: none;
+}
+
+/* Focused DataTable: show the cursor with the standard block-cursor style */
+DataTable:focus > .datatable--cursor {
+    background: $block-cursor-background;
+    color: $block-cursor-foreground;
+    text-style: $block-cursor-text-style;
+}
+
+/* DataTable fills pane so no gap below the last row */
+ConfigScreen .pane DataTable {
+    height: 1fr;
+    scrollbar-size-horizontal: 0;
+}

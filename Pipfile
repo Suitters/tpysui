@@ -9,9 +9,11 @@ pathvalidate = "*"
 twine = "*"
 build = "*"
 pip = "*"
-textual = "*"
 textual-dev = "*"
 pysui = "*"
+textual = ">=8.2.7"
+tomli-w = "*"
+tomli = "*"
 
 [dev-packages]
 textual-dev = "*"

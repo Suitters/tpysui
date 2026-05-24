@@ -1,9 +1,3 @@
-#    Copyright Frank V. Castellucci
-#    SPDX-License-Identifier: Apache-2.0
+from .version import __version__
 
-# -*- coding: utf-8 -*-
-
-"""TermPysui central."""
-
-from .screens import PyCfgScreen, MystenCfgScreen
-from .modals import *
+__all__ = ["__version__"]

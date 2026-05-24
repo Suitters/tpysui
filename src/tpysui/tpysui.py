@@ -6,7 +6,7 @@ from textual.widgets import ContentSwitcher, Footer
 
 from .version import __version__
 from .settings import Settings, load_settings
-from .services.base import SuiService
+from .services.base import ActiveStateChanged, SuiService
 from .services.faux_service import FauxSuiService
 from .widgets.sidebar import Sidebar
 from .widgets.active_state_bar import ActiveStateBar
@@ -52,6 +52,9 @@ class TpysuiApp(App):
 
     def on_sidebar_area_selected(self, msg: "Sidebar.AreaSelected") -> None:
         self.query_one(ContentSwitcher).current = msg.screen_id
+
+    def on_active_state_changed(self, msg: "ActiveStateChanged") -> None:
+        self.query_one(ActiveStateBar).set_state(msg.state)
 
 
 def main() -> None:

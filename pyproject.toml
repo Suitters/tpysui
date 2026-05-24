@@ -36,6 +36,9 @@ tpysui = "tpysui.tpysui:main"
 version = { attr = "tpysui.version.__version__" }
 readme = { file = ["README.rst"], content-type = "text/x-rst" }
 
+[tool.setuptools.package-data]
+"tpysui" = ["styles/*.tcss"]
+
 
 [project.urls]
 changelog = "https://github.com/suitters/tpysui/blob/main/CHANGELOG.md"

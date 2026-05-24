@@ -9,21 +9,6 @@ class ProfileModal(ModalScreen[dict | None]):
         ("escape", "cancel", "Cancel"),
         ("ctrl+s", "submit", "Save"),
     ]
-    DEFAULT_CSS = """
-    ProfileModal { align: center middle; }
-    ProfileModal #dialog {
-        width: 60;
-        height: auto;
-        border: thick $primary;
-        background: $surface;
-        padding: 1 2;
-    }
-    ProfileModal #modal-title { text-style: bold; margin-bottom: 1; }
-    ProfileModal Label { color: $text-muted; }
-    ProfileModal Input { margin-bottom: 1; }
-    ProfileModal #buttons { align: right middle; height: auto; margin-top: 1; }
-    ProfileModal Button { margin-left: 1; }
-    """
 
     def __init__(self, title: str = "Add Profile",
                  name: str = "", url: str = "", **kwargs) -> None:

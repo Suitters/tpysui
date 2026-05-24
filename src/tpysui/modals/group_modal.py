@@ -20,36 +20,6 @@ class GroupModal(ModalScreen[dict | None]):
         ("escape", "cancel", "Cancel"),
         ("ctrl+s", "submit", "Create"),
     ]
-    DEFAULT_CSS = """
-    GroupModal { align: center middle; }
-    GroupModal #dialog {
-        width: 70;
-        max-height: 38;
-        border: thick $primary;
-        background: $surface;
-    }
-    GroupModal #dialog VerticalScroll {
-        padding: 1 2;
-        border: none;
-    }
-    GroupModal #dialog-title { text-style: bold; margin-bottom: 1; }
-    GroupModal .section { margin-top: 1; }
-    GroupModal .field-label { color: $text-muted; }
-    GroupModal #std-section { display: block; }
-    GroupModal #custom-section { display: none; }
-    GroupModal .radio-box {
-        border: solid $accent;
-        padding: 0 1;
-        height: auto;
-        margin-bottom: 1;
-    }
-    GroupModal .radio-box RadioSet { border: none; padding: 0; }
-    GroupModal Collapsible { margin: 0; padding: 0; }
-    GroupModal CollapsibleTitle { padding: 0 1; background: $boost; }
-    GroupModal .list-scroll { max-height: 8; border: none; }
-    GroupModal #buttons { align: right middle; height: auto; margin-top: 1; }
-    GroupModal Button { margin-left: 1; }
-    """
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)

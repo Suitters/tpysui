@@ -10,6 +10,13 @@ class Sidebar(Tree[str]):
         ("Transaction Builder",      "screen-tx"),
         ("UCI Command Development",  "screen-uci"),
     ]
+    _DESCRIPTIONS = {
+        "screen-config": "Manage groups, profiles, and addresses in your PysuiConfig",
+        "screen-reads":  "Query on-chain data: objects, balances, events, and more",
+        "screen-writes": "Submit transactions: transfers, coin management, and contract calls",
+        "screen-tx":     "Build and inspect Programmable Transaction Blocks (PTBs)",
+        "screen-uci":    "Develop and test UCI commands interactively",
+    }
 
     class AreaSelected(Message):
         def __init__(self, screen_id: str) -> None:
@@ -46,4 +53,5 @@ class Sidebar(Tree[str]):
         event.stop()
         if event.node.data is not None:
             self.log(f"Sidebar -> {event.node.data}")
+            self.tooltip = self._DESCRIPTIONS.get(event.node.data)
             self.post_message(self.AreaSelected(event.node.data))

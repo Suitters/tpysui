@@ -39,14 +39,18 @@ class RealSuiService(SuiService):
         try:
             group = self._cfg.active_group
             profile = group.using_profile
+            profile_url = next(
+                (p.url for p in group.profiles if p.profile_name == profile), None
+            )
             address = group.using_address if group.address_list else None
             alias = group.active_alias if group.address_list else None
         except Exception:
-            profile = address = alias = None
+            profile = profile_url = address = alias = None
         return ActiveState(
             config_path=self._cfg.config,
             group_name=self._cfg.active_group_name,
             profile_name=profile,
+            profile_url=profile_url,
             address_alias=alias,
             address=address,
         )

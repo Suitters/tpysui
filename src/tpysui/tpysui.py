@@ -18,6 +18,15 @@ from .screens.tx_screen import TxScreen
 from .screens.uci_screen import UciScreen
 
 
+_AREA_LABELS = {
+    "screen-config": "Config",
+    "screen-reads":  "Data Reads",
+    "screen-writes": "Data Writes",
+    "screen-tx":     "Tx Builder",
+    "screen-uci":    "UCI Dev",
+}
+
+
 def _upsert_known(settings: Settings, path: str) -> None:
     existing = [k["path"] for k in settings.known_configs]
     if path not in existing:
@@ -25,10 +34,17 @@ def _upsert_known(settings: Settings, path: str) -> None:
 
 
 class TpysuiApp(App):
-    CSS_PATH = "tpysui.tcss"
+    CSS_PATH = "styles/tpysui.tcss"
     TITLE = "tpysui"
     SUB_TITLE = __version__
-    BINDINGS = [("ctrl+q", "quit", "Quit")]
+    BINDINGS = [
+        ("ctrl+q", "quit", "Quit"),
+        ("ctrl+1", "area_1", "Config"),
+        ("ctrl+2", "area_2", "Data Reads"),
+        ("ctrl+3", "area_3", "Data Writes"),
+        ("ctrl+4", "area_4", "Tx Builder"),
+        ("ctrl+5", "area_5", "UCI Dev"),
+    ]
 
     settings: Settings
     service: SuiService
@@ -46,6 +62,7 @@ class TpysuiApp(App):
         yield Footer()
 
     async def on_mount(self) -> None:
+        self.query_one(ActiveStateBar).set_area("Config")
         self.settings = load_settings()
         if self.settings.faux_mode:
             self.service = FauxSuiService()
@@ -55,7 +72,6 @@ class TpysuiApp(App):
         cfg_path = self.settings.default_config_path
         if cfg_path and (Path(cfg_path) / "PysuiConfig.json").exists():
             from pysui import PysuiConfiguration
-            from .services.real_service import RealSuiService
             config = PysuiConfiguration(from_cfg_path=cfg_path)
             await self._init_real_service(config)
         else:
@@ -97,11 +113,72 @@ class TpysuiApp(App):
         save_settings(self.settings)
         await self._init_real_service(config)
 
+    def _switch_area(self, screen_id: str) -> None:
+        self.query_one(ContentSwitcher).current = screen_id
+        self.query_one(ActiveStateBar).set_area(_AREA_LABELS.get(screen_id, "Config"))
+
+    def action_area_1(self) -> None:
+        self._switch_area("screen-config")
+
+    def action_area_2(self) -> None:
+        self._switch_area("screen-reads")
+
+    def action_area_3(self) -> None:
+        self._switch_area("screen-writes")
+
+    def action_area_4(self) -> None:
+        self._switch_area("screen-tx")
+
+    def action_area_5(self) -> None:
+        self._switch_area("screen-uci")
+
     def on_sidebar_area_selected(self, msg: "Sidebar.AreaSelected") -> None:
-        self.query_one(ContentSwitcher).current = msg.screen_id
+        self._switch_area(msg.screen_id)
 
     def on_active_state_changed(self, msg: "ActiveStateChanged") -> None:
         self.query_one(ActiveStateBar).set_state(msg.state)
+
+    async def on_active_state_bar_config_change_requested(
+        self, _: ActiveStateBar.ConfigChangeRequested
+    ) -> None:
+        from .modals.config_picker_modal import ConfigPickerModal
+
+        async def on_choice(path: str | None) -> None:
+            if path:
+                await self._load_config(path)
+
+        self.push_screen(ConfigPickerModal(), on_choice)
+
+    async def on_active_state_bar_group_change_requested(
+        self, _: ActiveStateBar.GroupChangeRequested
+    ) -> None:
+        groups = await self.service.list_groups()
+        if not groups:
+            return
+        from .modals.chooser_modal import ChooserModal
+
+        async def on_choice(name: str | None) -> None:
+            if name:
+                await self._switch_group(name)
+
+        self.push_screen(
+            ChooserModal("Switch Active Group", [g.name for g in groups]), on_choice
+        )
+
+    async def _load_config(self, path: str) -> None:
+        from pysui import PysuiConfiguration
+        try:
+            config = PysuiConfiguration(from_cfg_path=path)
+            self.settings.default_config_path = config.config
+            save_settings(self.settings)
+            await self._init_real_service(config)
+        except Exception as e:
+            self.notify(f"Failed to load config: {e}", severity="error")
+
+    async def _switch_group(self, name: str) -> None:
+        state = await self.service.set_active_group(name)
+        self.query_one(ActiveStateBar).set_state(state)
+        self.query_one(ConfigScreen).load()
 
 
 def main() -> None:

@@ -7,18 +7,6 @@ from textual.widgets import Button, Input, Label, Static
 class AddressChoiceModal(ModalScreen[str | None]):
     """Returns 'generate' or 'import', or None if cancelled."""
     BINDINGS = [("escape", "cancel", "Cancel")]
-    DEFAULT_CSS = """
-    AddressChoiceModal { align: center middle; }
-    AddressChoiceModal #dialog {
-        width: 40; height: auto;
-        border: thick $primary;
-        background: $surface;
-        padding: 1 2;
-    }
-    AddressChoiceModal #title { text-style: bold; margin-bottom: 1; }
-    AddressChoiceModal #buttons { align: center middle; height: auto; margin-top: 1; }
-    AddressChoiceModal Button { margin: 0 1; }
-    """
 
     def compose(self) -> ComposeResult:
         with Vertical(id="dialog"):
@@ -43,19 +31,6 @@ class AliasInputModal(ModalScreen[str | None]):
         ("escape", "cancel", "Cancel"),
         ("ctrl+s", "submit", "OK"),
     ]
-    DEFAULT_CSS = """
-    AliasInputModal { align: center middle; }
-    AliasInputModal #dialog {
-        width: 50; height: auto;
-        border: thick $primary;
-        background: $surface;
-        padding: 1 2;
-    }
-    AliasInputModal #modal-title { text-style: bold; margin-bottom: 1; }
-    AliasInputModal Label { color: $text-muted; }
-    AliasInputModal #buttons { align: right middle; height: auto; margin-top: 1; }
-    AliasInputModal Button { margin-left: 1; }
-    """
 
     def __init__(self, title: str, placeholder: str = "alias",
                  initial: str = "", **kwargs) -> None:
@@ -96,20 +71,6 @@ class ImportAddressModal(ModalScreen[dict | None]):
         ("escape", "cancel", "Cancel"),
         ("ctrl+s", "submit", "Import"),
     ]
-    DEFAULT_CSS = """
-    ImportAddressModal { align: center middle; }
-    ImportAddressModal #dialog {
-        width: 60; height: auto;
-        border: thick $primary;
-        background: $surface;
-        padding: 1 2;
-    }
-    ImportAddressModal #modal-title { text-style: bold; margin-bottom: 1; }
-    ImportAddressModal Label { color: $text-muted; }
-    ImportAddressModal Input { margin-bottom: 1; }
-    ImportAddressModal #buttons { align: right middle; height: auto; margin-top: 1; }
-    ImportAddressModal Button { margin-left: 1; }
-    """
 
     def compose(self) -> ComposeResult:
         with Vertical(id="dialog"):
@@ -143,19 +104,6 @@ class ImportAddressModal(ModalScreen[dict | None]):
 class MnemonicModal(ModalScreen[None]):
     """Displays a mnemonic phrase once. User must click OK to dismiss."""
     BINDINGS = [("escape", "ok", "OK"), ("enter", "ok", "OK")]
-    DEFAULT_CSS = """
-    MnemonicModal { align: center middle; }
-    MnemonicModal #dialog {
-        width: 64; height: auto;
-        border: thick $warning;
-        background: $surface;
-        padding: 1 2;
-    }
-    MnemonicModal #modal-title { text-style: bold; margin-bottom: 1; }
-    MnemonicModal #warning { color: $warning; margin-bottom: 1; }
-    MnemonicModal #mnemonic { text-style: bold; margin-bottom: 1; }
-    MnemonicModal #buttons { align: center middle; height: auto; margin-top: 1; }
-    """
 
     def __init__(self, alias: str, mnemonic: str, **kwargs) -> None:
         super().__init__(**kwargs)

@@ -7,29 +7,6 @@ from textual.widgets import Button, Label
 class ConfirmModal(ModalScreen[bool]):
     BINDINGS = [("escape", "cancel", "Cancel")]
 
-    DEFAULT_CSS = """
-    ConfirmModal {
-        align: center middle;
-    }
-    ConfirmModal #dialog {
-        width: 60;
-        height: auto;
-        border: thick $primary;
-        background: $surface;
-        padding: 1 2;
-    }
-    ConfirmModal #message {
-        margin-bottom: 1;
-    }
-    ConfirmModal #buttons {
-        align: right middle;
-        height: auto;
-    }
-    ConfirmModal Button {
-        margin-left: 1;
-    }
-    """
-
     def __init__(self, message: str, **kwargs) -> None:
         super().__init__(**kwargs)
         self._message = message

@@ -22,29 +22,6 @@ class ConfigScreen(Widget):
         ("e", "edit_row",   "Edit"),
         ("a", "set_active", "Set Active"),
     ]
-    DEFAULT_CSS = """
-    ConfigScreen {
-        layout: horizontal;
-        width: 1fr;
-        height: 1fr;
-    }
-    ConfigScreen .pane {
-        height: 100%;
-        border: solid $primary;
-    }
-    ConfigScreen #pane-groups    { width: 1fr; }
-    ConfigScreen #pane-profiles  { width: 2fr; }
-    ConfigScreen #pane-addresses { width: 2fr; }
-    ConfigScreen .pane-title {
-        dock: top;
-        height: 1;
-        background: $boost;
-        padding: 0 1;
-    }
-    ConfigScreen DataTable {
-        scrollbar-size-horizontal: 0;
-    }
-    """
 
     def on_mount(self) -> None:
         self.log("ConfigScreen mounted")

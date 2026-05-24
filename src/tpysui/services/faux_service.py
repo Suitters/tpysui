@@ -54,6 +54,7 @@ class FauxSuiService(SuiService):
             config_path=str(Path.home() / ".tpysui" / "faux" / "sui_config.json"),
             group_name="sui_config",
             profile_name="mainnet",
+            profile_url="https://sui-mainnet.mystenlabs.com/graphql",
             address_alias="alice",
             address="0x" + "01" * 32,
         )
@@ -73,6 +74,7 @@ class FauxSuiService(SuiService):
             config_path=kwargs.get("config_path", self._active.config_path),
             group_name=kwargs.get("group_name", self._active.group_name),
             profile_name=kwargs.get("profile_name", self._active.profile_name),
+            profile_url=kwargs.get("profile_url", self._active.profile_url),
             address_alias=kwargs.get("address_alias", self._active.address_alias),
             address=kwargs.get("address", self._active.address),
         )
@@ -152,6 +154,7 @@ class FauxSuiService(SuiService):
                 config_path=self._active.config_path,
                 group_name=g0.name,
                 profile_name=active_p.name if active_p else None,
+                profile_url=active_p.url if active_p else None,
                 address_alias=active_a.alias if active_a else None,
                 address=active_a.address if active_a else None,
             )
@@ -168,6 +171,7 @@ class FauxSuiService(SuiService):
         return self._update_active(
             group_name=name,
             profile_name=active_p.name if active_p else None,
+            profile_url=active_p.url if active_p else None,
             address_alias=active_a.alias if active_a else None,
             address=active_a.address if active_a else None,
         )
@@ -214,7 +218,11 @@ class FauxSuiService(SuiService):
         await asyncio.sleep(0.05)
         plist = self._profiles.get(group_name, [])
         self._profiles[group_name] = [replace(p, is_active=(p.name == name)) for p in plist]
-        return self._update_active(profile_name=name)
+        active_p = next((p for p in plist if p.name == name), None)
+        return self._update_active(
+            profile_name=name,
+            profile_url=active_p.url if active_p else None,
+        )
 
     # --- address mutations ---
 

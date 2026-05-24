@@ -41,6 +41,7 @@ class ActiveState:
     config_path: str | None
     group_name: str | None
     profile_name: str | None
+    profile_url: str | None
     address_alias: str | None
     address: str | None
 

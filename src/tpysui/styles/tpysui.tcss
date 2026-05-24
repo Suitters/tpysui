@@ -1,0 +1,273 @@
+/* ══════════════════════════════════════════════════════════
+   tpysui.tcss — consolidated stylesheet
+   Sections: App Layout, ActiveStateBar, ConfigScreen,
+             Modals (Startup, Group, Profile, Confirm,
+             Address×4, Chooser)
+   ══════════════════════════════════════════════════════════ */
+
+/* ── App Layout ─────────────────────────────────────────── */
+
+#main-row { height: 1fr; }
+#sidebar  { width: 30; border-right: solid $primary; background: $panel; }
+#content  { width: 1fr; height: 100%; }
+
+#screen-config,
+#screen-reads,
+#screen-writes,
+#screen-tx,
+#screen-uci {
+    width: 1fr;
+    height: 100%;
+}
+
+DataTable > .datatable--cursor {
+    background: transparent;
+    color: $text;
+    text-style: none;
+}
+DataTable:focus > .datatable--cursor {
+    background: $block-cursor-background;
+    color: $block-cursor-foreground;
+    text-style: $block-cursor-text-style;
+}
+
+/* ── ActiveStateBar ──────────────────────────────────────── */
+
+ActiveStateBar {
+    height: 4;
+    border-bottom: solid $primary;
+}
+ActiveStateBar #title-row {
+    height: 2;
+    background: $primary;
+    align: center middle;
+}
+ActiveStateBar #title-text {
+    text-style: bold;
+    color: $text;
+    width: auto;
+}
+ActiveStateBar #state-row {
+    height: 1;
+    background: $surface;
+    align: left middle;
+    padding: 0 2;
+}
+ActiveStateBar .state-btn {
+    width: auto;
+    height: 1;
+    color: $accent;
+    background: transparent;
+    padding: 0 1 0 0;
+}
+ActiveStateBar .state-btn:hover {
+    color: $text;
+    background: $boost;
+}
+ActiveStateBar .state-label {
+    width: auto;
+    color: $text-muted;
+    padding: 0 1 0 0;
+}
+ActiveStateBar .sep {
+    color: $primary;
+    width: 3;
+}
+
+/* ── ConfigScreen ────────────────────────────────────────── */
+
+ConfigScreen {
+    layout: horizontal;
+    width: 1fr;
+    height: 1fr;
+}
+ConfigScreen .pane {
+    height: 100%;
+    border: solid $primary;
+}
+ConfigScreen #pane-groups    { width: 1fr; }
+ConfigScreen #pane-profiles  { width: 2fr; }
+ConfigScreen #pane-addresses { width: 2fr; }
+ConfigScreen .pane-title {
+    dock: top;
+    height: 1;
+    background: $boost;
+    padding: 0 1;
+}
+ConfigScreen DataTable { scrollbar-size-horizontal: 0; }
+ConfigScreen .pane DataTable {
+    height: 1fr;
+    scrollbar-size-horizontal: 0;
+}
+
+/* ── StartupModal ────────────────────────────────────────── */
+
+StartupModal { align: center middle; }
+StartupModal #dialog {
+    width: 70;
+    height: auto;
+    max-height: 44;
+    border: thick $primary;
+    background: $surface;
+    padding: 1 2;
+}
+StartupModal #dialog-title { text-style: bold; margin-bottom: 1; }
+StartupModal #new-section  { display: none; height: auto; }
+StartupModal #open-section { display: none; height: auto; }
+StartupModal .field-label  { color: $text-muted; margin-top: 1; }
+StartupModal DirectoryTree { height: 18; border: solid $accent; margin-top: 1; }
+StartupModal #selected-path { color: $accent; margin-top: 1; height: auto; }
+StartupModal #choice-buttons  { align: center middle; height: auto; margin-top: 1; }
+StartupModal #action-buttons  { align: right middle;  height: auto; margin-top: 1; }
+StartupModal Button { margin: 0 1; }
+
+/* ── GroupModal ──────────────────────────────────────────── */
+
+GroupModal { align: center middle; }
+GroupModal #dialog {
+    width: 70;
+    max-height: 38;
+    border: thick $primary;
+    background: $surface;
+}
+GroupModal #dialog VerticalScroll { padding: 1 2; border: none; }
+GroupModal #dialog-title { text-style: bold; margin-bottom: 1; }
+GroupModal .section      { margin-top: 1; }
+GroupModal .field-label  { color: $text-muted; }
+GroupModal #std-section    { display: block; }
+GroupModal #custom-section { display: none; }
+GroupModal .radio-box {
+    border: solid $accent;
+    padding: 0 1;
+    height: auto;
+    margin-bottom: 1;
+}
+GroupModal .radio-box RadioSet { border: none; padding: 0; }
+GroupModal Collapsible       { margin: 0; padding: 0; }
+GroupModal CollapsibleTitle  { padding: 0 1; background: $boost; }
+GroupModal .list-scroll      { max-height: 8; border: none; }
+GroupModal #buttons          { align: right middle; height: auto; margin-top: 1; }
+GroupModal Button            { margin-left: 1; }
+
+/* ── ProfileModal ────────────────────────────────────────── */
+
+ProfileModal { align: center middle; }
+ProfileModal #dialog {
+    width: 60;
+    height: auto;
+    border: thick $primary;
+    background: $surface;
+    padding: 1 2;
+}
+ProfileModal #modal-title { text-style: bold; margin-bottom: 1; }
+ProfileModal Label         { color: $text-muted; }
+ProfileModal Input         { margin-bottom: 1; }
+ProfileModal #buttons      { align: right middle; height: auto; margin-top: 1; }
+ProfileModal Button        { margin-left: 1; }
+
+/* ── ConfirmModal ────────────────────────────────────────── */
+
+ConfirmModal { align: center middle; }
+ConfirmModal #dialog {
+    width: 60;
+    height: auto;
+    border: thick $primary;
+    background: $surface;
+    padding: 1 2;
+}
+ConfirmModal #message { margin-bottom: 1; }
+ConfirmModal #buttons { align: right middle; height: auto; }
+ConfirmModal Button   { margin-left: 1; }
+
+/* ── AddressChoiceModal ──────────────────────────────────── */
+
+AddressChoiceModal { align: center middle; }
+AddressChoiceModal #dialog {
+    width: 40;
+    height: auto;
+    border: thick $primary;
+    background: $surface;
+    padding: 1 2;
+}
+AddressChoiceModal #title   { text-style: bold; margin-bottom: 1; }
+AddressChoiceModal #buttons { align: center middle; height: auto; margin-top: 1; }
+AddressChoiceModal Button   { margin: 0 1; }
+
+/* ── AliasInputModal ─────────────────────────────────────── */
+
+AliasInputModal { align: center middle; }
+AliasInputModal #dialog {
+    width: 50;
+    height: auto;
+    border: thick $primary;
+    background: $surface;
+    padding: 1 2;
+}
+AliasInputModal #modal-title { text-style: bold; margin-bottom: 1; }
+AliasInputModal Label        { color: $text-muted; }
+AliasInputModal #buttons     { align: right middle; height: auto; margin-top: 1; }
+AliasInputModal Button       { margin-left: 1; }
+
+/* ── ImportAddressModal ──────────────────────────────────── */
+
+ImportAddressModal { align: center middle; }
+ImportAddressModal #dialog {
+    width: 60;
+    height: auto;
+    border: thick $primary;
+    background: $surface;
+    padding: 1 2;
+}
+ImportAddressModal #modal-title { text-style: bold; margin-bottom: 1; }
+ImportAddressModal Label        { color: $text-muted; }
+ImportAddressModal Input        { margin-bottom: 1; }
+ImportAddressModal #buttons     { align: right middle; height: auto; margin-top: 1; }
+ImportAddressModal Button       { margin-left: 1; }
+
+/* ── MnemonicModal ───────────────────────────────────────── */
+
+MnemonicModal { align: center middle; }
+MnemonicModal #dialog {
+    width: 64;
+    height: auto;
+    border: thick $warning;
+    background: $surface;
+    padding: 1 2;
+}
+MnemonicModal #modal-title { text-style: bold; margin-bottom: 1; }
+MnemonicModal #warning     { color: $warning; margin-bottom: 1; }
+MnemonicModal #mnemonic    { text-style: bold; margin-bottom: 1; }
+MnemonicModal #buttons     { align: center middle; height: auto; margin-top: 1; }
+
+/* ── ChooserModal ────────────────────────────────────────── */
+
+ChooserModal { align: center middle; }
+ChooserModal #dialog {
+    width: 50;
+    height: auto;
+    max-height: 20;
+    border: thick $primary;
+    background: $surface;
+    padding: 1 2;
+}
+ChooserModal #title    { text-style: bold; margin-bottom: 1; }
+ChooserModal ListView  { height: auto; max-height: 12; border: solid $accent; }
+ChooserModal #buttons  { align: right middle; height: auto; margin-top: 1; }
+ChooserModal Button    { margin-left: 1; }
+
+/* ── ConfigPickerModal ───────────────────────────────────── */
+
+ConfigPickerModal { align: center middle; }
+ConfigPickerModal #dialog {
+    width: 70;
+    height: auto;
+    max-height: 40;
+    border: thick $primary;
+    background: $surface;
+    padding: 1 2;
+}
+ConfigPickerModal #dialog-title  { text-style: bold; margin-bottom: 1; }
+ConfigPickerModal DirectoryTree  { height: 20; border: solid $accent; margin-top: 1; }
+ConfigPickerModal #selected-path { color: $accent; margin-top: 1; height: 1; }
+ConfigPickerModal #buttons       { align: right middle; height: auto; margin-top: 1; }
+ConfigPickerModal Button         { margin-left: 1; }

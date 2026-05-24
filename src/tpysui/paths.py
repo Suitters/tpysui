@@ -6,4 +6,4 @@ def settings_dir() -> Path:
 
 
 def settings_path() -> Path:
-    return settings_dir() / "settings.toml"
+    return settings_dir() / "tpysui_setting.toml"

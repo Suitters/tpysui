@@ -108,12 +108,15 @@ class ConfigScreen(Widget):
         self._groups = groups
         gt = self.query_one("#groups-table", DataTable)
         gt.clear()
-        for g in groups:
+        active_row = 0
+        for i, g in enumerate(groups):
             marker = "*" if g.is_active else ""
             gt.add_row(marker, g.name, g.protocol.value,
                        str(g.profile_count), str(g.address_count), key=g.name)
+            if g.is_active:
+                active_row = i
         if groups:
-            gt.move_cursor(row=0)
+            gt.move_cursor(row=active_row)
 
     @work(exclusive=True, group="config-groups", exit_on_error=False)
     async def _reload_groups_select(self, select_name: str) -> None:

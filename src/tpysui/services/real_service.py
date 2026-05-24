@@ -1,10 +1,57 @@
 from pysui import PysuiConfiguration
 from pysui.abstracts.client_keypair import SignatureScheme
 from pysui.sui.sui_common.config import confgroup as _cg
+from pysui.sui.sui_common.factory import client_factory
+from pysui.sui.sui_common import sui_commands as _sc
 
 from .base import (
-    ActiveState, AddressInfo, GroupInfo, GroupProtocol, ProfileInfo, SuiService,
+    ActiveState, AddressInfo, GroupInfo, GroupProtocol, ObjectSummaryInfo,
+    ProfileInfo, ReadResult, SuiService,
 )
+
+_COMMAND_MAP: dict[str, type] = {
+    "GetCoinMetaData": _sc.GetCoinMetaData,
+    "GetAddressCoinBalance": _sc.GetAddressCoinBalance,
+    "GetAddressCoinBalances": _sc.GetAddressCoinBalances,
+    "GetCoins": _sc.GetCoins,
+    "GetGas": _sc.GetGas,
+    "GetCoinSummary": _sc.GetCoinSummary,
+    "GetStaked": _sc.GetStaked,
+    "GetDelegatedStakes": _sc.GetDelegatedStakes,
+    "GetObject": _sc.GetObject,
+    "GetPastObject": _sc.GetPastObject,
+    "GetObjectSummary": _sc.GetObjectSummary,
+    "GetObjectContent": _sc.GetObjectContent,
+    "GetObjectsOwnedByAddress": _sc.GetObjectsOwnedByAddress,
+    "GetObjectsForType": _sc.GetObjectsForType,
+    "GetMultipleObjects": _sc.GetMultipleObjects,
+    "GetMultipleObjectSummary": _sc.GetMultipleObjectSummary,
+    "GetMultipleObjectContent": _sc.GetMultipleObjectContent,
+    "GetMultiplePastObjects": _sc.GetMultiplePastObjects,
+    "GetDynamicFields": _sc.GetDynamicFields,
+    "GetBasicCurrentEpochInfo": _sc.GetBasicCurrentEpochInfo,
+    "GetEpoch": _sc.GetEpoch,
+    "GetLatestCheckpoint": _sc.GetLatestCheckpoint,
+    "GetCheckpointBySequence": _sc.GetCheckpointBySequence,
+    "GetCheckpointByDigest": _sc.GetCheckpointByDigest,
+    "GetChainIdentifier": _sc.GetChainIdentifier,
+    "GetLatestSuiSystemState": _sc.GetLatestSuiSystemState,
+    "GetProtocolConfig": _sc.GetProtocolConfig,
+    "GetCurrentValidators": _sc.GetCurrentValidators,
+    "GetPackage": _sc.GetPackage,
+    "GetPackageVersions": _sc.GetPackageVersions,
+    "GetModule": _sc.GetModule,
+    "GetMoveDataType": _sc.GetMoveDataType,
+    "GetStructure": _sc.GetStructure,
+    "GetStructures": _sc.GetStructures,
+    "GetFunction": _sc.GetFunction,
+    "GetFunctions": _sc.GetFunctions,
+    "GetNameServiceAddress": _sc.GetNameServiceAddress,
+    "GetNameServiceNames": _sc.GetNameServiceNames,
+    "GetTransaction": _sc.GetTransaction,
+    "GetTransactions": _sc.GetTransactions,
+    "GetTransactionKind": _sc.GetTransactionKind,
+}
 
 
 def _to_our(p: _cg.GroupProtocol) -> GroupProtocol:
@@ -34,6 +81,9 @@ def _scheme_name(cfg: PysuiConfiguration, address: str, group_name: str) -> str:
 class RealSuiService(SuiService):
     def __init__(self, config: PysuiConfiguration) -> None:
         self._cfg = config
+        self._read_client = None
+        self._client_group: str | None = None
+        self._client_profile: str | None = None
 
     async def active_state(self) -> ActiveState:
         try:
@@ -227,3 +277,71 @@ class RealSuiService(SuiService):
     async def set_active_address(self, group_name: str, alias: str) -> ActiveState:
         self._cfg.make_active(group_name=group_name, alias=alias, persist=True)
         return await self.active_state()
+
+    async def _get_read_client(self):
+        try:
+            active_group = self._cfg.active_group_name
+            active_profile = self._cfg.active_profile
+        except Exception:
+            active_group = active_profile = None
+        if (
+            self._read_client is None
+            or self._client_group != active_group
+            or self._client_profile != active_profile
+        ):
+            if self._read_client is not None:
+                try:
+                    await self._read_client.close()
+                except Exception:
+                    pass
+            self._read_client = client_factory(self._cfg)
+            self._client_group = active_group
+            self._client_profile = active_profile
+        return self._read_client
+
+    async def aclose(self) -> None:
+        if self._read_client is not None:
+            try:
+                await self._read_client.close()
+            except Exception:
+                pass
+            self._read_client = None
+
+    async def execute_read(self, command_name: str, kwargs: dict, cursor: bytes | None) -> ReadResult:
+        command_class = _COMMAND_MAP.get(command_name)
+        if command_class is None:
+            return ReadResult(json_str=None, cursor=None, error=f"Unknown command: {command_name}")
+        is_pageable = getattr(command_class, "is_pageable_grpc", False) or getattr(command_class, "is_pageable_gql", False)
+        try:
+            call_kwargs = dict(kwargs)
+            if cursor is not None and is_pageable:
+                call_kwargs["next_page_token"] = cursor
+            command = command_class(**call_kwargs)
+            client = await self._get_read_client()
+            result = await client.execute(command=command)
+            if result.is_ok():
+                next_cursor = getattr(result.result_data, "next_page_token", None) if is_pageable else None
+                return ReadResult(
+                    json_str=result.result_data.to_json(indent=2),
+                    cursor=next_cursor or None,
+                    error=None,
+                )
+            return ReadResult(json_str=None, cursor=None, error=result.result_string or "Unknown error")
+        except Exception as exc:
+            return ReadResult(json_str=None, cursor=None, error=str(exc) or f"{type(exc).__name__} (no message)")
+
+    async def get_owned_objects(self, owner: str) -> list[ObjectSummaryInfo]:
+        try:
+            client = await self._get_read_client()
+            result = await client.execute_for_all(command=_sc.GetObjectsOwnedByAddress(owner=owner))
+            if not result.is_ok():
+                return []
+            objects = []
+            for obj in result.result_data.objects:
+                obj_id = str(obj.object_id or "")
+                obj_type = str(obj.object_type or "")
+                if obj_id:
+                    objects.append(ObjectSummaryInfo(object_id=obj_id, object_type=obj_type))
+            return objects
+        except Exception:
+            return []

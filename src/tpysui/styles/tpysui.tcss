@@ -271,3 +271,186 @@ ConfigPickerModal DirectoryTree  { height: 20; border: solid $accent; margin-top
 ConfigPickerModal #selected-path { color: $accent; margin-top: 1; height: 1; }
 ConfigPickerModal #buttons       { align: right middle; height: auto; margin-top: 1; }
 ConfigPickerModal Button         { margin-left: 1; }
+
+/* ── ReadsScreen ─────────────────────────────────────── */
+
+ReadsScreen {
+    layout: vertical;
+    height: 1fr;
+    padding: 0 1;
+}
+
+#reads_body {
+    height: 1fr;
+    layout: vertical;
+}
+
+#cmd_row {
+    height: auto;
+    align: center middle;
+    padding: 1 0;
+}
+
+#cmd_row Select {
+    width: 50;
+}
+
+#arg_get_row {
+    layout: horizontal;
+    height: auto;
+    padding: 0 0 1 0;
+    align: left middle;
+}
+
+#args_container {
+    layout: horizontal;
+    height: auto;
+    width: 1fr;
+    align: left middle;
+}
+
+#btn_get {
+    width: auto;
+}
+
+#status_label {
+    height: 1;
+    padding: 0 1;
+    color: $success;
+}
+
+#status_label.error {
+    color: $error;
+}
+
+#result_text {
+    border: solid $primary;
+    height: 1fr;
+}
+
+#action_row {
+    layout: horizontal;
+    height: 3;
+    margin-top: 1;
+}
+
+#btn_clear {
+    width: auto;
+}
+
+#btn_next {
+    dock: right;
+    width: auto;
+}
+
+/* ── Arg widgets ─────────────────────────────────────── */
+
+PlainInput {
+    height: auto;
+}
+
+PlainInput > Horizontal {
+    height: auto;
+    align: left middle;
+}
+
+PlainInput Label {
+    width: auto;
+    padding: 0 1;
+}
+
+PlainInput Input {
+    width: 24;
+}
+
+MultiValueInput {
+    height: auto;
+}
+
+MultiValueInput > Horizontal {
+    height: auto;
+    align: left middle;
+}
+
+MultiValueInput Label {
+    width: auto;
+    padding: 0 1;
+}
+
+MultiValueInput Input {
+    width: 30;
+}
+
+AddressSelect {
+    height: auto;
+}
+
+AddressSelect > Horizontal {
+    height: auto;
+    align: left middle;
+}
+
+AddressSelect Label {
+    width: auto;
+    padding: 0 1;
+}
+
+AddressSelect Select {
+    width: 42;
+}
+
+AddressSelect #other_inp {
+    width: 24;
+}
+
+ObjectSelect {
+    height: auto;
+}
+
+ObjectSelect > Horizontal {
+    height: auto;
+    align: left middle;
+}
+
+ObjectSelect Label {
+    width: auto;
+    padding: 0 1;
+}
+
+ObjectSelect Select {
+    width: 30;
+}
+
+ObjectSelect #other_inp {
+    width: 24;
+}
+
+ObjectChecklist {
+    height: auto;
+    max-height: 10;
+    border: solid $accent;
+    padding: 0 1;
+}
+
+ObjectChecklist #checklist {
+    height: auto;
+    max-height: 6;
+}
+
+ForVersionsWidget {
+    height: auto;
+    border: solid $accent;
+    padding: 0 1;
+}
+
+ForVersionsWidget #obj_sel {
+    width: 28;
+}
+
+ForVersionsWidget #other_inp {
+    width: 24;
+}
+
+ForVersionsWidget #versions_inp {
+    width: 20;
+}

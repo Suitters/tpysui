@@ -61,6 +61,11 @@ class TpysuiApp(App):
                 yield UciScreen(id="screen-uci")
         yield Footer()
 
+    async def action_quit(self) -> None:
+        if hasattr(self, "service"):
+            await self.service.aclose()
+        self.exit()
+
     async def on_mount(self) -> None:
         self.query_one(ActiveStateBar).set_area("Config")
         self.settings = load_settings()
@@ -81,8 +86,10 @@ class TpysuiApp(App):
     async def _init_real_service(self, config: object) -> None:
         from .services.real_service import RealSuiService
         self.service = RealSuiService(config)
-        self.query_one(ActiveStateBar).set_state(await self.service.active_state())
+        state = await self.service.active_state()
+        self.query_one(ActiveStateBar).set_state(state)
         self.query_one(ConfigScreen).load()
+        self.query_one(ReadsScreen).notify_state_changed(state)
 
     async def _on_startup_result(self, result: dict | None) -> None:
         if result is None:
@@ -113,9 +120,11 @@ class TpysuiApp(App):
         save_settings(self.settings)
         await self._init_real_service(config)
 
-    def _switch_area(self, screen_id: str) -> None:
+    def _switch_area(self, screen_id: str, move_cursor: bool = True) -> None:
         self.query_one(ContentSwitcher).current = screen_id
         self.query_one(ActiveStateBar).set_area(_AREA_LABELS.get(screen_id, "Config"))
+        if move_cursor:
+            self.query_one(Sidebar).select_area(screen_id)
 
     def action_area_1(self) -> None:
         self._switch_area("screen-config")
@@ -133,10 +142,11 @@ class TpysuiApp(App):
         self._switch_area("screen-uci")
 
     def on_sidebar_area_selected(self, msg: "Sidebar.AreaSelected") -> None:
-        self._switch_area(msg.screen_id)
+        self._switch_area(msg.screen_id, move_cursor=False)
 
     def on_active_state_changed(self, msg: "ActiveStateChanged") -> None:
         self.query_one(ActiveStateBar).set_state(msg.state)
+        self.query_one(ReadsScreen).notify_state_changed(msg.state)
 
     async def on_active_state_bar_config_change_requested(
         self, _: ActiveStateBar.ConfigChangeRequested
@@ -179,6 +189,7 @@ class TpysuiApp(App):
         state = await self.service.set_active_group(name)
         self.query_one(ActiveStateBar).set_state(state)
         self.query_one(ConfigScreen).load()
+        self.query_one(ReadsScreen).notify_state_changed(state)
 
 
 def main() -> None:

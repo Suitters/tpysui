@@ -27,6 +27,7 @@ class Sidebar(Tree[str]):
         super().__init__("Areas", **kwargs)
         self.show_root = False
         self.guide_depth = 2
+        self._suppress_msg = False
 
     def on_mount(self) -> None:
         for label, screen_id in self.AREAS:
@@ -49,9 +50,21 @@ class Sidebar(Tree[str]):
         else:
             super().action_cursor_up()
 
+    def select_area(self, screen_id: str) -> None:
+        for node in self.root.children:
+            if node.data == screen_id:
+                if self.cursor_node is node:
+                    return
+                self._suppress_msg = True
+                self.select_node(node)
+                break
+
     def on_tree_node_highlighted(self, event: Tree.NodeHighlighted) -> None:
         event.stop()
         if event.node.data is not None:
             self.log(f"Sidebar -> {event.node.data}")
             self.tooltip = self._DESCRIPTIONS.get(event.node.data)
-            self.post_message(self.AreaSelected(event.node.data))
+            if self._suppress_msg:
+                self._suppress_msg = False
+            else:
+                self.post_message(self.AreaSelected(event.node.data))

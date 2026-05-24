@@ -5,7 +5,7 @@ from pathlib import Path
 
 from .base import (
     ActiveState, ActiveStateChanged, AddressInfo, GroupInfo, GroupProtocol,
-    ProfileInfo, SuiService,
+    ObjectSummaryInfo, ProfileInfo, ReadResult, SuiService,
 )
 
 _FAKE_MNEMONIC = (
@@ -284,3 +284,22 @@ class FauxSuiService(SuiService):
         self._addresses[group_name] = [replace(a, is_active=(a.alias == alias)) for a in alist]
         addr = next((a.address for a in alist if a.alias == alias), None)
         return self._update_active(address_alias=alias, address=addr)
+
+    async def execute_read(self, command_name: str, kwargs: dict, cursor: bytes | None) -> ReadResult:
+        await asyncio.sleep(0.05)
+        return ReadResult(
+            json_str=f'{{"stub": "faux result for {command_name}", "kwargs": {list(kwargs.keys())}}}',
+            cursor=None,
+            error=None,
+        )
+
+    async def aclose(self) -> None:
+        pass
+
+    async def get_owned_objects(self, owner: str) -> list[ObjectSummaryInfo]:
+        await asyncio.sleep(0.05)
+        return [
+            ObjectSummaryInfo(object_id="0x" + "aa" * 32, object_type="0x2::coin::Coin<0x2::sui::SUI>"),
+            ObjectSummaryInfo(object_id="0x" + "bb" * 32, object_type="0x2::coin::Coin<0x2::sui::SUI>"),
+            ObjectSummaryInfo(object_id="0x" + "cc" * 32, object_type="0xdeadbeef::nft::MyNFT"),
+        ]

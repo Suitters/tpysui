@@ -46,6 +46,34 @@ class ActiveState:
     address: str | None
 
 
+@dataclass(frozen=True)
+class ObjectSummaryInfo:
+    object_id: str
+    object_type: str
+
+
+@dataclass(frozen=True)
+class ReadResult:
+    json_str: str | None
+    cursor: bytes | None
+    error: str | None
+
+
+@dataclass(frozen=True)
+class ArgInfo:
+    name: str
+    arg_type: str
+    optional: bool = False
+
+
+@dataclass(frozen=True)
+class CommandInfo:
+    name: str
+    category: str
+    args: tuple["ArgInfo", ...]
+    pageable: bool
+
+
 class ActiveStateChanged(Message):
     """Posted when the active group/profile/address changes."""
 
@@ -109,3 +137,12 @@ class SuiService(ABC):
 
     @abstractmethod
     async def set_active_address(self, group_name: str, alias: str) -> ActiveState: ...
+
+    @abstractmethod
+    async def execute_read(self, command_name: str, kwargs: dict, cursor: bytes | None) -> ReadResult: ...
+
+    @abstractmethod
+    async def get_owned_objects(self, owner: str) -> "list[ObjectSummaryInfo]": ...
+
+    @abstractmethod
+    async def aclose(self) -> None: ...

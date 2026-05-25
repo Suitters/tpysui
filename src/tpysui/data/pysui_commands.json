@@ -1,0 +1,1068 @@
+{
+  "commands": [
+    {
+      "name": "GetCoinMetaData",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Coin / Balance",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "coin_type",
+          "kind": {
+            "type": "scalar",
+            "validation": "type_tag"
+          },
+          "optional": true,
+          "default": [
+            "0x2::sui::SUI"
+          ],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetAddressCoinBalance",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Coin / Balance",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "owner",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        },
+        {
+          "name": "coin_type",
+          "kind": {
+            "type": "scalar",
+            "validation": "type_tag"
+          },
+          "optional": true,
+          "default": [
+            "0x2::sui::SUI"
+          ],
+          "source": "owned_coins",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetAddressCoinBalances",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Coin / Balance",
+      "mode": "read",
+      "pageable": true,
+      "args": [
+        {
+          "name": "owner",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetCoins",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Coin / Balance",
+      "mode": "read",
+      "pageable": true,
+      "args": [
+        {
+          "name": "owner",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        },
+        {
+          "name": "coin_type",
+          "kind": {
+            "type": "scalar",
+            "validation": "type_tag"
+          },
+          "optional": true,
+          "default": [
+            "0x2::coin::Coin<0x2::sui::SUI>"
+          ],
+          "source": "owned_coins",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetGas",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Coin / Balance",
+      "mode": "read",
+      "pageable": true,
+      "args": [
+        {
+          "name": "owner",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetCoinSummary",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Coin / Balance",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "coin_id",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "owned_coins",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetStaked",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Staking",
+      "mode": "read",
+      "pageable": true,
+      "args": [
+        {
+          "name": "owner",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetDelegatedStakes",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Staking",
+      "mode": "read",
+      "pageable": true,
+      "args": [
+        {
+          "name": "owner",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetObject",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Objects",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "object_id",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "owned_objects",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetPastObject",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Objects",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "object_id",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "owned_objects",
+          "multiple": false
+        },
+        {
+          "name": "version",
+          "kind": {
+            "type": "scalar",
+            "validation": "unsigned_int"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetObjectSummary",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Objects",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "object_id",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "owned_objects",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetObjectContent",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Objects",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "object_id",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "owned_objects",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetObjectsOwnedByAddress",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Objects",
+      "mode": "read",
+      "pageable": true,
+      "args": [
+        {
+          "name": "owner",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetObjectsForType",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Objects",
+      "mode": "read",
+      "pageable": true,
+      "args": [
+        {
+          "name": "owner",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        },
+        {
+          "name": "object_type",
+          "kind": {
+            "type": "scalar",
+            "validation": "type_tag"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetMultipleObjects",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Objects",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "object_ids",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "owned_objects",
+          "multiple": true,
+          "min_items": 1
+        }
+      ]
+    },
+    {
+      "name": "GetMultipleObjectSummary",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Objects",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "object_ids",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "owned_objects",
+          "multiple": true,
+          "min_items": 1
+        }
+      ]
+    },
+    {
+      "name": "GetMultipleObjectContent",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Objects",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "object_ids",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "owned_objects",
+          "multiple": true,
+          "min_items": 1
+        }
+      ]
+    },
+    {
+      "name": "GetMultiplePastObjects",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Objects",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "for_versions",
+          "kind": {
+            "type": "compound",
+            "shape": "named",
+            "fields": [
+              {
+                "name": "address",
+                "kind": {
+                  "type": "scalar",
+                  "validation": "sui_address"
+                },
+                "optional": false,
+                "source": "owned_objects"
+              },
+              {
+                "name": "version",
+                "kind": {
+                  "type": "scalar",
+                  "validation": "unsigned_int"
+                },
+                "optional": false,
+                "source": "none"
+              }
+            ]
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": true,
+          "min_items": 1
+        }
+      ]
+    },
+    {
+      "name": "GetDynamicFields",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Objects",
+      "mode": "read",
+      "pageable": true,
+      "args": [
+        {
+          "name": "object_id",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "owned_objects",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetBasicCurrentEpochInfo",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Epoch / Chain",
+      "mode": "read",
+      "pageable": false,
+      "args": []
+    },
+    {
+      "name": "GetEpoch",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Epoch / Chain",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "epoch_id",
+          "kind": {
+            "type": "scalar",
+            "validation": "unsigned_int"
+          },
+          "optional": true,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetLatestCheckpoint",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Epoch / Chain",
+      "mode": "read",
+      "pageable": false,
+      "args": []
+    },
+    {
+      "name": "GetCheckpointBySequence",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Epoch / Chain",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "sequence_number",
+          "kind": {
+            "type": "scalar",
+            "validation": "unsigned_int"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetCheckpointByDigest",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Epoch / Chain",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "digest",
+          "kind": {
+            "type": "scalar",
+            "validation": "base58"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetChainIdentifier",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Epoch / Chain",
+      "mode": "read",
+      "pageable": false,
+      "args": []
+    },
+    {
+      "name": "GetLatestSuiSystemState",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Epoch / Chain",
+      "mode": "read",
+      "pageable": false,
+      "args": []
+    },
+    {
+      "name": "GetProtocolConfig",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Epoch / Chain",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "version",
+          "kind": {
+            "type": "scalar",
+            "validation": "unsigned_int"
+          },
+          "optional": true,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetCurrentValidators",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Validators",
+      "mode": "read",
+      "pageable": true,
+      "args": []
+    },
+    {
+      "name": "GetPackage",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Packages / Move",
+      "mode": "read",
+      "pageable": true,
+      "args": [
+        {
+          "name": "package",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetPackageVersions",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Packages / Move",
+      "mode": "read",
+      "pageable": true,
+      "args": [
+        {
+          "name": "package_address",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetModule",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Packages / Move",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "package",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "module_name",
+          "kind": {
+            "type": "scalar",
+            "validation": "none"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetMoveDataType",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Packages / Move",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "package",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "module_name",
+          "kind": {
+            "type": "scalar",
+            "validation": "none"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "type_name",
+          "kind": {
+            "type": "scalar",
+            "validation": "none"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetStructure",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Packages / Move",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "package",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "module_name",
+          "kind": {
+            "type": "scalar",
+            "validation": "none"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "structure_name",
+          "kind": {
+            "type": "scalar",
+            "validation": "none"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetStructures",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Packages / Move",
+      "mode": "read",
+      "pageable": true,
+      "args": [
+        {
+          "name": "package",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "module_name",
+          "kind": {
+            "type": "scalar",
+            "validation": "none"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetFunction",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Packages / Move",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "package",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "module_name",
+          "kind": {
+            "type": "scalar",
+            "validation": "none"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "function_name",
+          "kind": {
+            "type": "scalar",
+            "validation": "none"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetFunctions",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Packages / Move",
+      "mode": "read",
+      "pageable": true,
+      "args": [
+        {
+          "name": "package",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "module_name",
+          "kind": {
+            "type": "scalar",
+            "validation": "none"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetNameServiceAddress",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Name Service",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "name",
+          "kind": {
+            "type": "scalar",
+            "validation": "none"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetNameServiceNames",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Name Service",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "owner",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": false,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetTransaction",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Transactions",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "digest",
+          "kind": {
+            "type": "scalar",
+            "validation": "base58"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "GetTransactions",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Transactions",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "digests",
+          "kind": {
+            "type": "scalar",
+            "validation": "base58"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": true,
+          "min_items": 1
+        }
+      ]
+    },
+    {
+      "name": "GetTransactionKind",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Transactions",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "digest",
+          "kind": {
+            "type": "scalar",
+            "validation": "base58"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "SimulateTransaction",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Transactions",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "tx_bytestr",
+          "kind": {
+            "type": "scalar",
+            "validation": "base64"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "checks_enabled",
+          "kind": {
+            "type": "scalar",
+            "validation": "bool"
+          },
+          "optional": true,
+          "default": [
+            true
+          ],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "gas_selection",
+          "kind": {
+            "type": "scalar",
+            "validation": "bool"
+          },
+          "optional": true,
+          "default": [
+            true
+          ],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "VerifyTransactionSignature",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Verification",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "message",
+          "kind": {
+            "type": "scalar",
+            "validation": "base64"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "signature",
+          "kind": {
+            "type": "scalar",
+            "validation": "base64"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "author",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": true,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "VerifyPersonalMessageSignature",
+      "source_module": "pysui.sui.sui_common.sui_commands",
+      "group": "Verification",
+      "mode": "read",
+      "pageable": false,
+      "args": [
+        {
+          "name": "message",
+          "kind": {
+            "type": "scalar",
+            "validation": "base64"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "signature",
+          "kind": {
+            "type": "scalar",
+            "validation": "base64"
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "author",
+          "kind": {
+            "type": "scalar",
+            "validation": "sui_address"
+          },
+          "optional": true,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        }
+      ]
+    }
+  ]
+}

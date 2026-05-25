@@ -14,6 +14,7 @@ from .version import __version__
 from .settings import Settings, load_settings, save_settings
 from .services.base import ActiveStateChanged, SuiService
 from .services.faux_service import FauxSuiService
+from .services.taxonomy_loader import CommandEntry, load_command_registry
 from .widgets.sidebar import Sidebar
 from .widgets.active_state_bar import ActiveStateBar
 from .screens.config_screen import ConfigScreen
@@ -53,6 +54,7 @@ class TpysuiApp(App):
 
     settings: Settings
     service: SuiService
+    command_registry: dict[str, CommandEntry]
 
     def compose(self) -> ComposeResult:
         yield ActiveStateBar(id="active-state-bar")
@@ -74,6 +76,7 @@ class TpysuiApp(App):
     async def on_mount(self) -> None:
         self.query_one(ActiveStateBar).set_area("Config")
         self.settings = load_settings()
+        self.command_registry = load_command_registry()
         if self.settings.faux_mode:
             self.service = FauxSuiService()
             self.query_one(ActiveStateBar).set_state(await self.service.active_state())

@@ -18,6 +18,13 @@ from ..utils.validators import valid_sui_address
 _OTHER = "__other__"
 
 
+def fmt_id(id_str: str) -> str:
+    """Format an address or object ID as 0x<8 chars>...<4 chars> for display."""
+    if id_str.startswith("0x") and len(id_str) > 14:
+        return f"{id_str[:10]}...{id_str[-4:]}"
+    return id_str
+
+
 class PlainInput(Widget):
     """Single text input with optional validator. Used for most scalar args."""
 
@@ -102,7 +109,7 @@ class AddressSelect(Widget):
 
     def compose(self) -> ComposeResult:
         options: list[tuple[str, str]] = [
-            (f"{a.alias} ({a.address[:8]}…)", a.address) for a in self._addresses
+            (f"{a.alias} ({fmt_id(a.address)})", a.address) for a in self._addresses
         ]
         options.append(("Other…", _OTHER))
         with Horizontal():
@@ -140,9 +147,10 @@ class AddressSelect(Widget):
 class ObjectSelect(Widget):
     """Select from owned objects (eager-loaded) or enter manually."""
 
-    def __init__(self, label: str, **kwargs: Any) -> None:
+    def __init__(self, label: str, arg_type: str = "object_id", **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._arg_name = label
+        self._arg_type = arg_type
 
     def compose(self) -> ComposeResult:
         with Horizontal():
@@ -155,7 +163,7 @@ class ObjectSelect(Widget):
 
     def populate(self, objects: list[ObjectSummaryInfo]) -> None:
         options: list[tuple[str, str]] = [
-            (f"{o.object_id[:10]}… — {o.object_type[:24]}", o.object_id)
+            (f"{fmt_id(o.object_id)} — {o.object_type[:24]}", o.object_id)
             for o in objects
         ]
         options.append(("Other…", _OTHER))
@@ -207,7 +215,7 @@ class ObjectChecklist(Widget):
         checklist = self.query_one("#checklist")
         checklist.remove_children()
         for obj in objects:
-            label = f"{obj.object_id[:10]}… — {obj.object_type[:24]}"
+            label = f"{fmt_id(obj.object_id)} — {obj.object_type[:24]}"
             checklist.mount(Checkbox(label, id=f"chk_{obj.object_id[:16]}"))
 
     def get_name_value(self) -> tuple[str, Any]:
@@ -259,7 +267,7 @@ class ForVersionsWidget(Widget):
 
     def populate(self, objects: list[ObjectSummaryInfo]) -> None:
         options: list[tuple[str, str]] = [
-            (f"{o.object_id[:10]}… — {o.object_type[:24]}", o.object_id)
+            (f"{fmt_id(o.object_id)} — {o.object_type[:24]}", o.object_id)
             for o in objects
         ]
         options.append(("Other…", _OTHER))

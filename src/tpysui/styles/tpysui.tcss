@@ -347,10 +347,12 @@ ReadsScreen {
 
 PlainInput {
     height: auto;
+    width: auto;
 }
 
 PlainInput > Horizontal {
     height: auto;
+    width: auto;
     align: left middle;
 }
 
@@ -360,15 +362,17 @@ PlainInput Label {
 }
 
 PlainInput Input {
-    width: 24;
+    width: 42;
 }
 
 MultiValueInput {
     height: auto;
+    width: auto;
 }
 
 MultiValueInput > Horizontal {
     height: auto;
+    width: auto;
     align: left middle;
 }
 
@@ -378,15 +382,17 @@ MultiValueInput Label {
 }
 
 MultiValueInput Input {
-    width: 30;
+    width: 42;
 }
 
 AddressSelect {
     height: auto;
+    width: auto;
 }
 
 AddressSelect > Horizontal {
     height: auto;
+    width: auto;
     align: left middle;
 }
 
@@ -400,15 +406,17 @@ AddressSelect Select {
 }
 
 AddressSelect #other_inp {
-    width: 24;
+    width: 42;
 }
 
 ObjectSelect {
     height: auto;
+    width: auto;
 }
 
 ObjectSelect > Horizontal {
     height: auto;
+    width: auto;
     align: left middle;
 }
 
@@ -418,11 +426,11 @@ ObjectSelect Label {
 }
 
 ObjectSelect Select {
-    width: 30;
+    width: 42;
 }
 
 ObjectSelect #other_inp {
-    width: 24;
+    width: 42;
 }
 
 ObjectChecklist {
@@ -437,18 +445,35 @@ ObjectChecklist #checklist {
     max-height: 6;
 }
 
+ObjectChecklist Horizontal {
+    height: auto;
+    width: auto;
+    align: left middle;
+}
+
+ObjectChecklist #other_inp {
+    width: 42;
+}
+
 ForVersionsWidget {
     height: auto;
+    width: auto;
     border: solid $accent;
     padding: 0 1;
 }
 
+ForVersionsWidget Horizontal {
+    height: auto;
+    width: auto;
+    align: left middle;
+}
+
 ForVersionsWidget #obj_sel {
-    width: 28;
+    width: 42;
 }
 
 ForVersionsWidget #other_inp {
-    width: 24;
+    width: 42;
 }
 
 ForVersionsWidget #versions_inp {

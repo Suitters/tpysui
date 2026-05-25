@@ -4,11 +4,19 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        
         {
             "name": "termpysui",
             "type": "debugpy",
             "request": "launch",
             "module": "src.tpysui.tpysui",
+            "justMyCode": false
+        },
+        {
+            "name": "TPYSUI",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "tpysui",
             "justMyCode": false
         },
         {

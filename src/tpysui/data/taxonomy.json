@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tpysui:taxonomy",
+  "title": "tpysui Command Taxonomy",
+  "description": "Meta-schema for pysui_commands.json and user_commands.json. Every command file validated against this schema before use.",
+  "type": "object",
+  "required": ["commands"],
+  "additionalProperties": false,
+  "properties": {
+    "commands": {
+      "type": "array",
+      "description": "Ordered list of command definitions.",
+      "items": { "$ref": "#/$defs/Command" }
+    }
+  },
+  "$defs": {
+
+    "Source": {
+      "description": "Where the UI pre-populates candidate values for an arg or named-compound field. 'none' means plain text input only.",
+      "type": "string",
+      "enum": ["none", "group_addresses", "owned_objects", "owned_coins"]
+    },
+
+    "Validation": {
+      "description": "Scalar value validation hint used by the UI widget and service layer. Semantics: 'none'=plain text; 'sui_address'=0x-prefixed 64-char hex; 'type_tag'=fully-qualified Move type expression with optional nested generics (e.g. 0x2::coin::Coin<0x2::sui::SUI>); 'move_identifier'=<pkg>::<module>::<name> where pkg is a sui_address and module/name are Move identifier strings (letter-first, alphanumeric+underscore); 'unsigned_int'=non-negative integer; 'bool'=boolean rendered as Toggle; 'base64'=base64-encoded blob; 'base58'=base58-encoded value (includes Sui digests).",
+      "type": "string",
+      "enum": [
+        "none",
+        "sui_address",
+        "type_tag",
+        "move_identifier",
+        "unsigned_int",
+        "bool",
+        "base64",
+        "base58"
+      ]
+    },
+
+    "ScalarKind": {
+      "description": "A single primitive value. Widget rendered depends on 'validation': bool -> Toggle; others -> Input (with source-driven picker if source != none).",
+      "type": "object",
+      "required": ["type", "validation"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "scalar" },
+        "validation": { "$ref": "#/$defs/Validation" }
+      }
+    },
+
+    "NamedField": {
+      "description": "One field within a named compound. Carries its own source hint so CollectorModal can render the appropriate widget per column.",
+      "type": "object",
+      "required": ["name", "kind", "optional", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "name":     { "type": "string", "description": "The kwarg key name as pysui expects it." },
+        "kind":     { "$ref": "#/$defs/Kind" },
+        "optional": { "type": "boolean", "description": "True if this field may be absent from the produced dict." },
+        "source":   { "$ref": "#/$defs/Source" }
+      }
+    },
+
+    "NamedCompoundKind": {
+      "description": "A dict with a fixed, named set of fields (e.g. {address: str, version: int}). Rendered as a multi-column row in CollectorModal.",
+      "type": "object",
+      "required": ["type", "shape", "fields"],
+      "additionalProperties": false,
+      "properties": {
+        "type":   { "const": "compound" },
+        "shape":  { "const": "named" },
+        "fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/NamedField" },
+          "minItems": 1
+        }
+      }
+    },
+
+    "KeyedCompoundKind": {
+      "description": "A homogeneous dict where every entry shares the same key and value types (e.g. dict[str, int]). Keys are always scalar.",
+      "type": "object",
+      "required": ["type", "shape", "key_kind", "value_kind"],
+      "additionalProperties": false,
+      "properties": {
+        "type":       { "const": "compound" },
+        "shape":      { "const": "keyed" },
+        "key_kind":   { "$ref": "#/$defs/ScalarKind" },
+        "value_kind": { "$ref": "#/$defs/Kind" }
+      }
+    },
+
+    "Kind": {
+      "description": "The type+shape of a value. One of: scalar, named compound, keyed compound.",
+      "oneOf": [
+        { "$ref": "#/$defs/ScalarKind" },
+        { "$ref": "#/$defs/NamedCompoundKind" },
+        { "$ref": "#/$defs/KeyedCompoundKind" }
+      ]
+    },
+
+    "Arg": {
+      "description": "One argument to a command. 'multiple: true' means the user builds a list; CollectorModal is used. 'min_items' is required when multiple is true.",
+      "type": "object",
+      "required": ["name", "kind", "optional", "default", "source", "multiple"],
+      "additionalProperties": false,
+      "properties": {
+        "name":      { "type": "string", "description": "The kwarg name passed to the SuiCommand constructor." },
+        "kind":      { "$ref": "#/$defs/Kind" },
+        "optional":  { "type": "boolean", "description": "True if the arg may be omitted from the kwargs entirely." },
+        "default": {
+          "type": "array",
+          "description": "[] = no default; [x] = pre-populate with x; [x,y,...] = static Select with Other fallback."
+        },
+        "source":    { "$ref": "#/$defs/Source" },
+        "multiple":  { "type": "boolean", "description": "True if the arg accepts a list; CollectorModal accumulates entries." },
+        "min_items": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Minimum list length before submission is allowed. Required when multiple is true. Consistent with optional: min_items>=1 implies optional=false."
+        }
+      },
+      "if":   { "properties": { "multiple": { "const": true } } },
+      "then": { "required": ["min_items"] }
+    },
+
+    "Command": {
+      "description": "One command entry. Source (pysui vs user) is determined by which file the entry is loaded from, not by a field in the entry itself.",
+      "type": "object",
+      "required": ["name", "source_module", "group", "mode", "pageable", "args"],
+      "additionalProperties": false,
+      "properties": {
+        "name":          { "type": "string", "description": "The class name within source_module to instantiate (e.g. 'GetObject')." },
+        "source_module": { "type": "string", "description": "Fully-qualified Python module path containing the command class (e.g. 'pysui.sui.sui_common.sui_commands')." },
+        "group":         { "type": "string", "description": "Display group label in the sidebar / command picker (e.g. 'Coin / Balance')." },
+        "mode":          { "type": "string", "enum": ["read", "write"], "description": "'read' for query-only commands; 'write' for mutation commands." },
+        "pageable":      { "type": "boolean", "description": "True if the result may include a next_page_token. Enables the Next button in the UI." },
+        "args": {
+          "type": "array",
+          "description": "Ordered list of arguments. next_page_token is never listed here — it is managed internally by the service layer.",
+          "items": { "$ref": "#/$defs/Arg" }
+        }
+      }
+    }
+
+  }
+}

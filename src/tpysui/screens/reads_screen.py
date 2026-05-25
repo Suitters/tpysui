@@ -34,6 +34,7 @@ from ..widgets.arg_widgets import (
     ObjectChecklist,
     ObjectSelect,
     PlainInput,
+    fmt_id,
 )
 
 
@@ -41,15 +42,16 @@ def _make_arg_widget(arg: ArgInfo) -> Widget:
     t = arg.arg_type
     if t == "owner":
         return AddressSelect(label=arg.name, addresses=[])
-    if t in ("object_id", "coin_id"):
+    if t == "coin_id":
+        return ObjectSelect(label=arg.name, arg_type="coin_id")
+    if t == "object_id":
         return ObjectSelect(label=arg.name)
     if t == "object_ids":
         return ObjectChecklist()
     if t == "for_versions":
         return ForVersionsWidget()
     if t == "coin_type":
-        default = "0x2::sui::SUI" if arg.optional else ""
-        return PlainInput(label=arg.name, validator=valid_type_tag, optional=arg.optional, default=default)
+        return PlainInput(label=arg.name, validator=valid_type_tag, optional=arg.optional)
     if t == "object_type":
         return PlainInput(label=arg.name, validator=valid_type_tag, optional=arg.optional)
     if t in ("package", "package_address"):
@@ -67,8 +69,12 @@ def _make_arg_widget(arg: ArgInfo) -> Widget:
     return PlainInput(label=arg.name)
 
 
+def _needs_coins(cmd_info: CommandInfo) -> bool:
+    return any(a.arg_type == "coin_id" for a in cmd_info.args)
+
+
 def _needs_objects(cmd_info: CommandInfo) -> bool:
-    return any(a.arg_type in ("object_id", "coin_id", "object_ids", "for_versions") for a in cmd_info.args)
+    return any(a.arg_type in ("object_id", "object_ids", "for_versions") for a in cmd_info.args)
 
 
 def _has_owner_arg(cmd_info: CommandInfo) -> bool:
@@ -96,7 +102,7 @@ class ReadsScreen(Widget):
             yield Label("", id="status_label")
             yield TextArea("", id="result_text", language="json", read_only=True)
             with Horizontal(id="action_row"):
-                yield Button("Clear", id="btn_clear", variant="default")
+                yield Button("Clear", id="btn_clear", variant="primary")
                 yield Button("Next »", id="btn_next", variant="primary")
 
     def on_mount(self) -> None:
@@ -187,18 +193,28 @@ class ReadsScreen(Widget):
             for w in self.query_one("#args_container").children:
                 if isinstance(w, AddressSelect):
                     w._addresses = addresses
-                    opts = [(f"{a.alias} ({a.address[:8]}…)", a.address) for a in addresses]
+                    opts = [(f"{a.alias} ({fmt_id(a.address)})", a.address) for a in addresses]
                     opts.append(("Other…", "__other__"))
                     w.query_one(Select).set_options(opts)
                     if addresses:
                         w.query_one(Select).value = addresses[0].address
+
+        if _needs_coins(cmd_info):
+            owner = state.address
+            if owner:
+                coins = await self.app.service.get_owned_coins(owner)  # type: ignore[attr-defined]
+                for w in self.query_one("#args_container").children:
+                    if isinstance(w, ObjectSelect) and w._arg_type == "coin_id":
+                        w.populate(coins)
 
         if _needs_objects(cmd_info):
             owner = state.address
             if owner:
                 objects = await self.app.service.get_owned_objects(owner)  # type: ignore[attr-defined]
                 for w in self.query_one("#args_container").children:
-                    if isinstance(w, (ObjectSelect, ObjectChecklist, ForVersionsWidget)):
+                    if isinstance(w, ObjectSelect) and w._arg_type != "coin_id":
+                        w.populate(objects)
+                    elif isinstance(w, (ObjectChecklist, ForVersionsWidget)):
                         w.populate(objects)
 
     def on_button_pressed(self, event: Button.Pressed) -> None:

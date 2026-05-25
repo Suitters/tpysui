@@ -308,3 +308,10 @@ class FauxSuiService(SuiService):
             ObjectSummaryInfo(object_id="0x" + "bb" * 32, object_type="0x2::coin::Coin<0x2::sui::SUI>"),
             ObjectSummaryInfo(object_id="0x" + "cc" * 32, object_type="0xdeadbeef::nft::MyNFT"),
         ]
+
+    async def get_owned_coins(self, owner: str) -> list[ObjectSummaryInfo]:
+        await asyncio.sleep(0.05)
+        return [
+            ObjectSummaryInfo(object_id="0x" + "aa" * 32, object_type="0x2::coin::Coin<0x2::sui::SUI>"),
+            ObjectSummaryInfo(object_id="0x" + "bb" * 32, object_type="0x2::coin::Coin<0x2::sui::SUI>"),
+        ]

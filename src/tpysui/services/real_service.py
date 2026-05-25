@@ -350,3 +350,19 @@ class RealSuiService(SuiService):
             return objects
         except Exception:
             return []
+
+    async def get_owned_coins(self, owner: str) -> list[ObjectSummaryInfo]:
+        try:
+            client = await self._get_read_client()
+            result = await client.execute_for_all(command=_sc.GetCoins(owner=owner))
+            if not result.is_ok():
+                return []
+            objects = []
+            for obj in result.result_data.objects:
+                obj_id = str(obj.object_id or "")
+                obj_type = str(obj.object_type or "")
+                if obj_id:
+                    objects.append(ObjectSummaryInfo(object_id=obj_id, object_type=obj_type))
+            return objects
+        except Exception:
+            return []

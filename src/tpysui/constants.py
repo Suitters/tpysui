@@ -1,3 +1,8 @@
+#    Copyright Frank V. Castellucci
+#    SPDX-License-Identifier: Apache-2.0
+
+# -*- coding: utf-8 -*-
+
 SUI_GQL_GROUP  = "sui_gql_config"
 SUI_GRPC_GROUP = "sui_grpc_config"
 SUI_USER_GROUP = "user"

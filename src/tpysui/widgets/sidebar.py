@@ -1,3 +1,8 @@
+#    Copyright Frank V. Castellucci
+#    SPDX-License-Identifier: Apache-2.0
+
+# -*- coding: utf-8 -*-
+
 from textual.message import Message
 from textual.widgets import Tree
 

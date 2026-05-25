@@ -1,3 +1,8 @@
+#    Copyright Frank V. Castellucci
+#    SPDX-License-Identifier: Apache-2.0
+
+# -*- coding: utf-8 -*-
+
 from pysui import PysuiConfiguration
 from pysui.abstracts.client_keypair import SignatureScheme
 from pysui.sui.sui_common.config import confgroup as _cg

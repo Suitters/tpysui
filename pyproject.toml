@@ -45,4 +45,4 @@ readme = { file = ["README.rst"], content-type = "text/x-rst" }
 changelog = "https://github.com/suitters/tpysui/blob/main/CHANGELOG.md"
 repository = "https://github.com/suitters/tpysui"
 issues = "https://github.com/suitters/tpysui/issues"
-documentation = "https://github.com/suitters/tpysui/blob/main/docs/tpysui.rst"
+documentation = "https://github.com/suitters/tpysui/blob/main/docs/index.rst"

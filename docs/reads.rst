@@ -16,8 +16,8 @@ Access with ``Ctrl+3`` or by selecting **Data Reads** in the sidebar.
 Command List
 ------------
 
-The left panel lists all available read commands grouped by category.
-Select a command to see its description and required arguments.
+A dropdown at the top of the screen lists all available read commands.
+Select a command from the dropdown to make it active.
 
 Running a Command
 -----------------

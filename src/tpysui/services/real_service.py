@@ -10,8 +10,8 @@ from pysui.sui.sui_common.factory import client_factory
 from pysui.sui.sui_common import sui_commands as _sc
 
 from .base import (
-    ActiveState, AddressInfo, GroupInfo, GroupProtocol, ObjectSummaryInfo,
-    ProfileInfo, ReadResult, SuiService,
+    ActiveState, AddressInfo, ChainInfo, GasObjectInfo, GroupInfo, GroupProtocol,
+    ObjectSummaryInfo, ProfileInfo, ReadResult, SuiService,
 )
 
 _COMMAND_MAP: dict[str, type] = {
@@ -312,6 +312,33 @@ class RealSuiService(SuiService):
                 pass
             self._read_client = None
 
+    async def get_chain_info(self) -> ChainInfo:
+        client = await self._get_read_client()
+        chain_id = epoch_str = ref_gas = validator_count = "—"
+        try:
+            res = await client.execute(command=_sc.GetChainIdentifier())
+            if res.is_ok() and isinstance(res.result_data, str):
+                chain_id = res.result_data
+        except Exception:
+            pass
+        try:
+            res = await client.execute(command=_sc.GetEpoch())
+            if res.is_ok():
+                ep = res.result_data.epoch
+                if ep is not None:
+                    epoch_str = str(ep.epoch) if ep.epoch is not None else "—"
+                    ref_gas = str(ep.reference_gas_price) if ep.reference_gas_price is not None else "—"
+                    vs = ep.system_state.validators if ep.system_state else None
+                    validator_count = str(len(vs.active_validators)) if vs else "—"
+        except Exception:
+            pass
+        return ChainInfo(
+            chain_id=chain_id,
+            epoch=epoch_str,
+            reference_gas_price=ref_gas,
+            validator_count=validator_count,
+        )
+
     async def execute_read(self, command_name: str, kwargs: dict, cursor: bytes | None) -> ReadResult:
         command_class = _COMMAND_MAP.get(command_name)
         if command_class is None:
@@ -326,8 +353,13 @@ class RealSuiService(SuiService):
             result = await client.execute(command=command)
             if result.is_ok():
                 next_cursor = getattr(result.result_data, "next_page_token", None) if is_pageable else None
+                data = result.result_data
+                if isinstance(data, str):
+                    json_str = data
+                else:
+                    json_str = data.to_json(indent=2)
                 return ReadResult(
-                    json_str=result.result_data.to_json(indent=2),
+                    json_str=json_str,
                     cursor=next_cursor or None,
                     error=None,
                 )
@@ -344,9 +376,13 @@ class RealSuiService(SuiService):
             objects = []
             for obj in result.result_data.objects:
                 obj_id = str(obj.object_id or "")
-                obj_type = str(obj.object_type or "")
                 if obj_id:
-                    objects.append(ObjectSummaryInfo(object_id=obj_id, object_type=obj_type))
+                    objects.append(ObjectSummaryInfo(
+                        object_id=obj_id,
+                        object_type=str(obj.object_type or ""),
+                        digest=str(obj.digest or ""),
+                        version=str(obj.version or 0),
+                    ))
             return objects
         except Exception:
             return []
@@ -366,3 +402,33 @@ class RealSuiService(SuiService):
             return objects
         except Exception:
             return []
+
+    async def get_gas_objects(self, owner: str) -> list[GasObjectInfo]:
+        try:
+            client = await self._get_read_client()
+            result = await client.execute_for_all(command=_sc.GetGas(owner=owner))
+            if not result.is_ok():
+                return []
+            objects = []
+            for obj in result.result_data.objects:
+                obj_id = str(obj.object_id or "")
+                if obj_id:
+                    objects.append(GasObjectInfo(
+                        object_id=obj_id,
+                        balance=str(obj.balance or 0),
+                        digest=str(obj.digest or ""),
+                        version=str(obj.version or 0),
+                    ))
+            return objects
+        except Exception:
+            return []
+
+    async def get_coin_balances(self, owner: str) -> str:
+        try:
+            client = await self._get_read_client()
+            result = await client.execute_for_all(command=_sc.GetAddressCoinBalances(owner=owner))
+            if not result.is_ok():
+                return ""
+            return result.result_data.to_json(indent=2)
+        except Exception:
+            return ""

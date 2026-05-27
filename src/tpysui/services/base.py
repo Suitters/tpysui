@@ -55,6 +55,24 @@ class ActiveState:
 class ObjectSummaryInfo:
     object_id: str
     object_type: str
+    digest: str = ""
+    version: str = ""
+
+
+@dataclass(frozen=True)
+class GasObjectInfo:
+    object_id: str
+    balance: str
+    digest: str = ""
+    version: str = ""
+
+
+@dataclass(frozen=True)
+class ChainInfo:
+    chain_id: str
+    epoch: str
+    reference_gas_price: str
+    validator_count: str
 
 
 @dataclass(frozen=True)
@@ -144,6 +162,9 @@ class SuiService(ABC):
     async def set_active_address(self, group_name: str, alias: str) -> ActiveState: ...
 
     @abstractmethod
+    async def get_chain_info(self) -> "ChainInfo": ...
+
+    @abstractmethod
     async def execute_read(self, command_name: str, kwargs: dict, cursor: bytes | None) -> ReadResult: ...
 
     @abstractmethod
@@ -151,6 +172,12 @@ class SuiService(ABC):
 
     @abstractmethod
     async def get_owned_coins(self, owner: str) -> "list[ObjectSummaryInfo]": ...
+
+    @abstractmethod
+    async def get_gas_objects(self, owner: str) -> "list[GasObjectInfo]": ...
+
+    @abstractmethod
+    async def get_coin_balances(self, owner: str) -> str: ...
 
     @abstractmethod
     async def aclose(self) -> None: ...

@@ -7,8 +7,8 @@ import logging
 from pathlib import Path
 
 from textual.app import App, ComposeResult
-from textual.containers import Horizontal
-from textual.widgets import ContentSwitcher, Footer
+from textual.containers import Horizontal, Vertical
+from textual.widgets import ContentSwitcher, Footer, Static
 
 from .version import __version__
 from .settings import Settings, load_settings, save_settings
@@ -18,6 +18,7 @@ from .services.taxonomy_loader import CommandEntry, load_command_registry
 from .widgets.sidebar import Sidebar
 from .widgets.active_state_bar import ActiveStateBar
 from .screens.config_screen import ConfigScreen
+from .screens.dashboard_screen import DashboardScreen
 from .screens.reads_screen import ReadsScreen
 from .screens.writes_screen import WritesScreen
 from .screens.tx_screen import TxScreen
@@ -25,11 +26,12 @@ from .screens.uci_screen import UciScreen
 
 
 _AREA_LABELS = {
-    "screen-config": "Config",
-    "screen-reads":  "Data Reads",
-    "screen-writes": "Data Writes",
-    "screen-tx":     "Tx Builder",
-    "screen-uci":    "UCI Dev",
+    "screen-dashboard": "Dashboard",
+    "screen-config":    "Config",
+    "screen-reads":     "Data Reads",
+    "screen-writes":    "Data Writes",
+    "screen-tx":        "Tx Builder",
+    "screen-uci":       "UCI Dev",
 }
 
 
@@ -45,11 +47,12 @@ class TpysuiApp(App):
     SUB_TITLE = __version__
     BINDINGS = [
         ("ctrl+q", "quit", "Quit"),
-        ("ctrl+1", "area_1", "Config"),
-        ("ctrl+2", "area_2", "Data Reads"),
-        ("ctrl+3", "area_3", "Data Writes"),
-        ("ctrl+4", "area_4", "Tx Builder"),
-        ("ctrl+5", "area_5", "UCI Dev"),
+        ("ctrl+1", "area_1", "Dashboard"),
+        ("ctrl+2", "area_2", "Config"),
+        ("ctrl+3", "area_3", "Data Reads"),
+        ("ctrl+4", "area_4", "Data Writes"),
+        ("ctrl+5", "area_5", "Tx Builder"),
+        ("ctrl+6", "area_6", "UCI Dev"),
     ]
 
     settings: Settings
@@ -59,8 +62,11 @@ class TpysuiApp(App):
     def compose(self) -> ComposeResult:
         yield ActiveStateBar(id="active-state-bar")
         with Horizontal(id="main-row"):
-            yield Sidebar(id="sidebar")
-            with ContentSwitcher(initial="screen-config", id="content"):
+            with Vertical(id="sidebar-panel"):
+                yield Static("Areas", id="sidebar-header")
+                yield Sidebar(id="sidebar")
+            with ContentSwitcher(initial="screen-dashboard", id="content"):
+                yield DashboardScreen(id="screen-dashboard")
                 yield ConfigScreen(id="screen-config")
                 yield ReadsScreen(id="screen-reads")
                 yield WritesScreen(id="screen-writes")
@@ -74,7 +80,7 @@ class TpysuiApp(App):
         self.exit()
 
     async def on_mount(self) -> None:
-        self.query_one(ActiveStateBar).set_area("Config")
+        self.query_one(ActiveStateBar).set_area("Dashboard")
         self.settings = load_settings()
         self.command_registry = load_command_registry()
         if self.settings.faux_mode:
@@ -98,6 +104,7 @@ class TpysuiApp(App):
         self.query_one(ActiveStateBar).set_state(state)
         self.query_one(ConfigScreen).load()
         self.query_one(ReadsScreen).notify_state_changed(state)
+        self.query_one(DashboardScreen).notify_state_changed(state)
 
     async def _on_startup_result(self, result: dict | None) -> None:
         if result is None:
@@ -135,18 +142,21 @@ class TpysuiApp(App):
             self.query_one(Sidebar).select_area(screen_id)
 
     def action_area_1(self) -> None:
-        self._switch_area("screen-config")
+        self._switch_area("screen-dashboard")
 
     def action_area_2(self) -> None:
-        self._switch_area("screen-reads")
+        self._switch_area("screen-config")
 
     def action_area_3(self) -> None:
-        self._switch_area("screen-writes")
+        self._switch_area("screen-reads")
 
     def action_area_4(self) -> None:
-        self._switch_area("screen-tx")
+        self._switch_area("screen-writes")
 
     def action_area_5(self) -> None:
+        self._switch_area("screen-tx")
+
+    def action_area_6(self) -> None:
         self._switch_area("screen-uci")
 
     def on_sidebar_area_selected(self, msg: "Sidebar.AreaSelected") -> None:
@@ -154,6 +164,7 @@ class TpysuiApp(App):
 
     def on_active_state_changed(self, msg: "ActiveStateChanged") -> None:
         self.query_one(ActiveStateBar).set_state(msg.state)
+        self.query_one(DashboardScreen).notify_state_changed(msg.state)
         self.query_one(ReadsScreen).notify_state_changed(msg.state)
 
     async def on_active_state_bar_config_change_requested(
@@ -197,6 +208,59 @@ class TpysuiApp(App):
         state = await self.service.set_active_group(name)
         self.query_one(ActiveStateBar).set_state(state)
         self.query_one(ConfigScreen).load()
+        self.query_one(DashboardScreen).notify_state_changed(state)
+        self.query_one(ReadsScreen).notify_state_changed(state)
+
+    async def on_active_state_bar_profile_change_requested(
+        self, _: ActiveStateBar.ProfileChangeRequested
+    ) -> None:
+        state = await self.service.active_state()
+        if not state.group_name:
+            return
+        profiles = await self.service.list_profiles(state.group_name)
+        if not profiles:
+            return
+        from .modals.chooser_modal import ChooserModal
+
+        async def on_choice(name: str | None) -> None:
+            if name:
+                await self._switch_profile(state.group_name, name)
+
+        self.push_screen(
+            ChooserModal("Switch Active Profile", [p.name for p in profiles]), on_choice
+        )
+
+    async def on_active_state_bar_address_change_requested(
+        self, _: ActiveStateBar.AddressChangeRequested
+    ) -> None:
+        state = await self.service.active_state()
+        if not state.group_name:
+            return
+        addresses = await self.service.list_addresses(state.group_name)
+        if not addresses:
+            return
+        from .modals.chooser_modal import ChooserModal
+
+        async def on_choice(alias: str | None) -> None:
+            if alias:
+                await self._switch_address(state.group_name, alias)
+
+        self.push_screen(
+            ChooserModal("Switch Active Address", [a.alias for a in addresses]), on_choice
+        )
+
+    async def _switch_profile(self, group_name: str, name: str) -> None:
+        state = await self.service.set_active_profile(group_name, name)
+        self.query_one(ActiveStateBar).set_state(state)
+        self.query_one(ConfigScreen).load()
+        self.query_one(DashboardScreen).notify_state_changed(state)
+        self.query_one(ReadsScreen).notify_state_changed(state)
+
+    async def _switch_address(self, group_name: str, alias: str) -> None:
+        state = await self.service.set_active_address(group_name, alias)
+        self.query_one(ActiveStateBar).set_state(state)
+        self.query_one(ConfigScreen).load()
+        self.query_one(DashboardScreen).notify_state_changed(state)
         self.query_one(ReadsScreen).notify_state_changed(state)
 
 

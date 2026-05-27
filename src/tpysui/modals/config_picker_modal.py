@@ -12,9 +12,13 @@ from textual.widgets import Button, DirectoryTree, Static
 
 
 class ConfigPickerModal(ModalScreen[str | None]):
-    """Browse for a folder containing PysuiConfig.json."""
+    """Browse for a folder. When require_config=True the folder must contain PysuiConfig.json."""
 
     BINDINGS = [("escape", "cancel", "Cancel")]
+
+    def __init__(self, require_config: bool = True, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self._require_config = require_config
 
     def compose(self) -> ComposeResult:
         with Vertical(id="dialog"):
@@ -28,7 +32,9 @@ class ConfigPickerModal(ModalScreen[str | None]):
         self, event: DirectoryTree.DirectorySelected
     ) -> None:
         path = event.path
-        if (path / "PysuiConfig.json").exists():
+        if not self._require_config:
+            self.dismiss(str(path))
+        elif (path / "PysuiConfig.json").exists():
             self.dismiss(str(path))
         else:
             self.query_one("#selected-path", Static).update(
@@ -39,7 +45,9 @@ class ConfigPickerModal(ModalScreen[str | None]):
         self, event: DirectoryTree.FileSelected
     ) -> None:
         path = event.path
-        if path.name == "PysuiConfig.json":
+        if not self._require_config:
+            self.dismiss(str(path.parent))
+        elif path.name == "PysuiConfig.json":
             self.dismiss(str(path.parent))
 
     def on_button_pressed(self, event: Button.Pressed) -> None:

@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 from textual import on
@@ -13,72 +14,10 @@ from textual.containers import Horizontal, Vertical
 from textual.widget import Widget
 from textual.widgets import Button, Label, Select, TextArea
 
-from ..services.base import (
-    ActiveState,
-    ArgInfo,
-    CommandInfo,
-    ReadResult,
-)
-from ..services.command_registry import COMMAND_LOOKUP, COMMAND_REGISTRY
-from ..utils.validators import (
-    valid_base58,
-    valid_move_identifier,
-    valid_sui_address,
-    valid_type_tag,
-    valid_unsigned_int,
-)
-from ..widgets.arg_widgets import (
-    AddressSelect,
-    ForVersionsWidget,
-    MultiValueInput,
-    ObjectChecklist,
-    ObjectSelect,
-    PlainInput,
-    fmt_id,
-)
-
-
-def _make_arg_widget(arg: ArgInfo) -> Widget:
-    t = arg.arg_type
-    if t == "owner":
-        return AddressSelect(label=arg.name, addresses=[])
-    if t == "coin_id":
-        return ObjectSelect(label=arg.name, arg_type="coin_id")
-    if t == "object_id":
-        return ObjectSelect(label=arg.name)
-    if t == "object_ids":
-        return ObjectChecklist()
-    if t == "for_versions":
-        return ForVersionsWidget()
-    if t == "coin_type":
-        return PlainInput(label=arg.name, validator=valid_type_tag, optional=arg.optional)
-    if t == "object_type":
-        return PlainInput(label=arg.name, validator=valid_type_tag, optional=arg.optional)
-    if t in ("package", "package_address"):
-        return PlainInput(label=arg.name, validator=valid_sui_address)
-    if t in ("module_name", "type_name", "structure_name", "function_name"):
-        return PlainInput(label=arg.name, validator=valid_move_identifier)
-    if t == "name":
-        return PlainInput(label=arg.name)
-    if t == "digest":
-        return PlainInput(label=arg.name, validator=valid_base58)
-    if t == "digests":
-        return MultiValueInput(label=arg.name, validator=valid_base58)
-    if t in ("version", "sequence_number", "epoch_id"):
-        return PlainInput(label=arg.name, validator=valid_unsigned_int, optional=arg.optional)
-    return PlainInput(label=arg.name)
-
-
-def _needs_coins(cmd_info: CommandInfo) -> bool:
-    return any(a.arg_type == "coin_id" for a in cmd_info.args)
-
-
-def _needs_objects(cmd_info: CommandInfo) -> bool:
-    return any(a.arg_type in ("object_id", "object_ids", "for_versions") for a in cmd_info.args)
-
-
-def _has_owner_arg(cmd_info: CommandInfo) -> bool:
-    return any(a.arg_type == "owner" for a in cmd_info.args)
+from ..modals.args_modal import ArgsModal
+from ..modals.save_modal import SaveModal
+from ..services.base import ActiveState, ReadResult
+from ..services.taxonomy_loader import CommandEntry
 
 
 class ReadsScreen(Widget):
@@ -89,28 +28,45 @@ class ReadsScreen(Widget):
         self._current_cmd: str | None = None
         self._cursor: bytes | None = None
         self._last_state: ActiveState | None = None
+        self._last_args_by_cmd: dict[str, dict[str, Any] | None] = {}
+        self._cmds_populated: bool = False
+        self._last_result_text: str = ""
 
     def compose(self) -> ComposeResult:
-        options = [(c.name, c.name) for c in COMMAND_REGISTRY]
         with Vertical(id="reads_body"):
             with Horizontal(id="cmd_row"):
-                yield Select(options, id="cmd_select", allow_blank=True, prompt="Select a read command…")
-            with Horizontal(id="arg_get_row"):
-                with Horizontal(id="args_container"):
-                    pass
-                yield Button("Get", id="btn_get", variant="primary", disabled=True)
-            yield Label("", id="status_label")
-            yield TextArea("", id="result_text", language="json", read_only=True)
+                yield Select(
+                    [],
+                    id="cmd_select",
+                    allow_blank=True,
+                    prompt="Select a read command…",
+                )
             with Horizontal(id="action_row"):
+                yield Button("Args...", id="btn_args", variant="primary", disabled=True)
+                yield Label("", id="status_lbl")
+                yield Button("Reset", id="btn_reset", variant="primary", disabled=True)
+                yield Button("Run", id="btn_run", variant="primary", disabled=True)
+            yield Label("", id="result_status_lbl")
+            yield TextArea("", id="result_text", language="json", read_only=True)
+            with Horizontal(id="export_row"):
+                yield Button("Copy", id="btn_copy", variant="primary")
+                yield Button("Save...", id="btn_save_file", variant="primary")
+            with Horizontal(id="next_row"):
                 yield Button("Clear", id="btn_clear", variant="primary")
                 yield Button("Next »", id="btn_next", variant="primary")
 
     def on_mount(self) -> None:
-        self.query_one("#status_label").display = False
+        self.query_one("#export_row").display = False
         self.query_one("#btn_clear").display = False
         self.query_one("#btn_next").display = False
+        self.query_one("#result_status_lbl").display = False
 
     async def on_show(self) -> None:
+        if not self._cmds_populated:
+            options = [(name, name) for name in self.app.command_registry]  # type: ignore[attr-defined]
+            self.query_one("#cmd_select", Select).set_options(options)
+            self._cmds_populated = True
+
         state = await self.app.service.active_state()  # type: ignore[attr-defined]
         if self._last_state is None:
             self._last_state = state
@@ -124,17 +80,6 @@ class ReadsScreen(Widget):
         if changed:
             await self._full_reset()
 
-    async def _full_reset(self) -> None:
-        self._current_cmd = None
-        self._cursor = None
-        self.query_one("#cmd_select", Select).clear()
-        await self.query_one("#args_container").remove_children()
-        self.query_one("#result_text", TextArea).load_text("")
-        self.query_one("#btn_get").disabled = True
-        self.query_one("#btn_clear").display = False
-        self.query_one("#btn_next").display = False
-        self._hide_status()
-
     def notify_state_changed(self, new_state: ActiveState) -> None:
         if self._last_state is not None and (
             new_state.config_path != self._last_state.config_path
@@ -144,97 +89,107 @@ class ReadsScreen(Widget):
             self.run_worker(self._full_reset(), exclusive=True, group="reset")
         self._last_state = new_state
 
-    def _show_status(self, text: str, variant: str = "success") -> None:
-        lbl = self.query_one("#status_label", Label)
-        lbl.update(text)
-        lbl.remove_class("error")
-        lbl.remove_class("success")
-        if variant == "error":
-            lbl.add_class("error")
-        lbl.display = True
-
-    def _hide_status(self) -> None:
-        self.query_one("#status_label").display = False
+    def _clear_result_area(self) -> None:
+        self._last_result_text = ""
+        self.query_one("#result_text", TextArea).load_text("")
+        self.query_one("#export_row").display = False
+        self.query_one("#btn_clear").display = False
+        self.query_one("#btn_next").display = False
+        self._clear_result_status()
 
     @on(Select.Changed, "#cmd_select")
     def on_command_selected(self, event: Select.Changed) -> None:
+        self._clear_result_area()
         if event.value is Select.BLANK:
             self._current_cmd = None
-            self.query_one("#btn_get").disabled = True
+            self._disable_actions()
             return
-        self._current_cmd = str(event.value)
+        cmd_name = str(event.value)
+        self._current_cmd = cmd_name
         self._cursor = None
-        self._hide_status()
-        self.run_worker(
-            self._render_and_load(str(event.value)),
-            exclusive=True,
-            group="render",
-        )
-
-    async def _render_and_load(self, cmd_name: str) -> None:
-        cmd_info = COMMAND_LOOKUP.get(cmd_name)
-        if cmd_info is None:
+        entry: CommandEntry | None = self.app.command_registry.get(cmd_name)  # type: ignore[attr-defined]
+        if entry is None:
             return
-        container = self.query_one("#args_container")
-        await container.remove_children()
-        if cmd_info.args:
-            widgets = [_make_arg_widget(a) for a in cmd_info.args]
-            await container.mount(*widgets)
-        self.query_one("#btn_get").disabled = False
-        self.query_one("#btn_clear").display = False
-        self.query_one("#btn_next").display = False
-        await self._load_pickers(cmd_info)
+        if not entry.args:
+            self._last_args_by_cmd.setdefault(cmd_name, {})
+        self.query_one("#btn_args").disabled = not bool(entry.args)
+        self.query_one("#btn_reset").disabled = False
+        self._update_run_and_status(cmd_name)
 
-    async def _load_pickers(self, cmd_info: CommandInfo) -> None:
-        state = await self.app.service.active_state()  # type: ignore[attr-defined]
+    def _is_run_ready(self, cmd_name: str) -> bool:
+        entry: CommandEntry | None = self.app.command_registry.get(cmd_name)  # type: ignore[attr-defined]
+        if entry is None:
+            return False
+        if not entry.args:
+            return True
+        values = self._last_args_by_cmd.get(cmd_name)
+        if values is None:
+            return False  # Must open Args at least once, even if all args are optional
+        return all(a.optional or a.name in values for a in entry.args)
 
-        if _has_owner_arg(cmd_info):
-            addresses = await self.app.service.list_addresses(state.group_name or "")  # type: ignore[attr-defined]
-            for w in self.query_one("#args_container").children:
-                if isinstance(w, AddressSelect):
-                    w._addresses = addresses
-                    opts = [(f"{a.alias} ({fmt_id(a.address)})", a.address) for a in addresses]
-                    opts.append(("Other…", "__other__"))
-                    w.query_one(Select).set_options(opts)
-                    if addresses:
-                        w.query_one(Select).value = addresses[0].address
-
-        if _needs_coins(cmd_info):
-            owner = state.address
-            if owner:
-                coins = await self.app.service.get_owned_coins(owner)  # type: ignore[attr-defined]
-                for w in self.query_one("#args_container").children:
-                    if isinstance(w, ObjectSelect) and w._arg_type == "coin_id":
-                        w.populate(coins)
-
-        if _needs_objects(cmd_info):
-            owner = state.address
-            if owner:
-                objects = await self.app.service.get_owned_objects(owner)  # type: ignore[attr-defined]
-                for w in self.query_one("#args_container").children:
-                    if isinstance(w, ObjectSelect) and w._arg_type != "coin_id":
-                        w.populate(objects)
-                    elif isinstance(w, (ObjectChecklist, ForVersionsWidget)):
-                        w.populate(objects)
+    def _update_run_and_status(self, cmd_name: str) -> None:
+        ready = self._is_run_ready(cmd_name)
+        self.query_one("#btn_run").disabled = not ready
+        lbl = self.query_one("#status_lbl", Label)
+        if ready:
+            lbl.update("Ready")
+            lbl.remove_class("status-incomplete")
+            lbl.add_class("status-ready")
+        else:
+            lbl.update("Incomplete")
+            lbl.remove_class("status-ready")
+            lbl.add_class("status-incomplete")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        btn_id = event.button.id
-        if btn_id == "btn_get":
-            self._on_get()
-        elif btn_id == "btn_next":
+        bid = event.button.id
+        if bid == "btn_args":
+            self._on_args()
+        elif bid == "btn_reset":
+            self._on_reset()
+        elif bid == "btn_run":
+            self._on_run()
+        elif bid == "btn_next":
             self._on_next()
-        elif btn_id == "btn_clear":
+        elif bid == "btn_clear":
             self._on_clear()
+        elif bid == "btn_copy":
+            self._on_copy()
+        elif bid == "btn_save_file":
+            self._on_save()
 
-    def _on_get(self) -> None:
+    def _on_args(self) -> None:
         if not self._current_cmd:
             return
-        errors, kwargs = self._collect_args()
-        if errors:
-            self._show_status("✗ " + "; ".join(errors), "error")
+        entry: CommandEntry | None = self.app.command_registry.get(self._current_cmd)  # type: ignore[attr-defined]
+        if entry is None:
             return
+        current_values = self._last_args_by_cmd.get(self._current_cmd)
+
+        def on_result(values: dict[str, Any] | None) -> None:
+            if values is not None and self._current_cmd:
+                self._last_args_by_cmd[self._current_cmd] = values
+                self._update_run_and_status(self._current_cmd)
+
+        self.app.push_screen(ArgsModal(entry, current_values), on_result)
+
+    def _on_reset(self) -> None:
+        if not self._current_cmd:
+            return
+        entry: CommandEntry | None = self.app.command_registry.get(self._current_cmd)  # type: ignore[attr-defined]
+        if entry is None:
+            return
+        if not entry.args:
+            self._last_args_by_cmd[self._current_cmd] = {}
+        else:
+            self._last_args_by_cmd.pop(self._current_cmd, None)
+        self._update_run_and_status(self._current_cmd)
+
+    def _on_run(self) -> None:
+        if not self._current_cmd:
+            return
+        kwargs = dict(self._last_args_by_cmd.get(self._current_cmd) or {})
         self._cursor = None
-        self._hide_status()
+        self._clear_result_status()
         self.run_worker(
             self._execute(self._current_cmd, kwargs, None),
             exclusive=True,
@@ -244,7 +199,7 @@ class ReadsScreen(Widget):
     def _on_next(self) -> None:
         if not self._current_cmd or self._cursor is None:
             return
-        _, kwargs = self._collect_args()
+        kwargs = dict(self._last_args_by_cmd.get(self._current_cmd) or {})
         self.run_worker(
             self._execute(self._current_cmd, kwargs, self._cursor),
             exclusive=True,
@@ -252,47 +207,85 @@ class ReadsScreen(Widget):
         )
 
     def _on_clear(self) -> None:
-        self.query_one("#result_text", TextArea).load_text("")
         self._cursor = None
-        self.query_one("#btn_clear").display = False
-        self.query_one("#btn_next").display = False
-        self._hide_status()
+        self._clear_result_area()
 
-    def _collect_args(self) -> tuple[list[str], dict]:
-        errors: list[str] = []
-        kwargs: dict = {}
-        for w in self.query_one("#args_container").children:
-            if isinstance(w, (PlainInput, MultiValueInput, AddressSelect,
-                               ObjectSelect, ObjectChecklist, ForVersionsWidget)):
-                err = w.validate()
-                if err:
-                    errors.append(err)
-                else:
-                    name, value = w.get_name_value()
-                    if value is not None:
-                        kwargs[name] = value
-        return errors, kwargs
+    def _on_copy(self) -> None:
+        if self._last_result_text:
+            self.app.copy_to_clipboard(self._last_result_text)
+            self._show_result_status("✓ Copied to clipboard")
 
-    async def _execute(self, cmd_name: str, kwargs: dict, cursor: bytes | None) -> None:
+    def _on_save(self) -> None:
+        if not self._last_result_text:
+            return
+
+        def on_result(path: Path | None) -> None:
+            if path is None:
+                return
+            try:
+                path.write_text(self._last_result_text, encoding="utf-8")
+                self._show_result_status(f"✓ Saved to {path.name}")
+            except OSError as exc:
+                self._show_result_status(f"✗ Save failed: {exc}", error=True)
+
+        self.app.push_screen(SaveModal(), on_result)
+
+    async def _execute(
+        self, cmd_name: str, kwargs: dict[str, Any], cursor: bytes | None
+    ) -> None:
         result: ReadResult = await self.app.service.execute_read(  # type: ignore[attr-defined]
             cmd_name, kwargs, cursor
         )
         if result.error:
-            self._show_status(f"✗ {result.error}", "error")
+            self._last_result_text = ""
+            self._show_result_status(f"✗ {result.error}", error=True)
             self.query_one("#result_text", TextArea).load_text("")
+            self.query_one("#export_row").display = False
             self.query_one("#btn_clear").display = False
             self.query_one("#btn_next").display = False
         else:
             self._cursor = result.cursor
             text = result.json_str or ""
+            self._last_result_text = text
             self.query_one("#result_text", TextArea).load_text(text)
+            entry: CommandEntry | None = self.app.command_registry.get(cmd_name)  # type: ignore[attr-defined]
+            is_pageable = entry is not None and entry.pageable
+            has_next = is_pageable and bool(result.cursor)
+            self.query_one("#export_row").display = bool(text)
             self.query_one("#btn_clear").display = bool(text)
-            cmd_info = COMMAND_LOOKUP.get(cmd_name)
-            is_pageable = cmd_info is not None and cmd_info.pageable
-            if is_pageable and result.cursor:
-                self.query_one("#btn_next").display = True
-                self.query_one("#btn_next").disabled = False
+            self.query_one("#btn_next").display = has_next
+            if has_next:
+                self._show_result_status("✓ Success, use Next for more")
             else:
-                self.query_one("#btn_next").display = False
-            lines = text.count("\n") + 1 if text else 0
-            self._show_status(f"✓ {lines} lines returned", "success")
+                self._show_result_status("✓ Success")
+
+    def _show_result_status(self, message: str, error: bool = False) -> None:
+        lbl = self.query_one("#result_status_lbl", Label)
+        lbl.update(message)
+        if error:
+            lbl.remove_class("result-success")
+            lbl.add_class("result-error")
+        else:
+            lbl.remove_class("result-error")
+            lbl.add_class("result-success")
+        lbl.display = True
+
+    def _clear_result_status(self) -> None:
+        self.query_one("#result_status_lbl", Label).display = False
+
+    def _disable_actions(self) -> None:
+        self.query_one("#btn_args").disabled = True
+        self.query_one("#btn_reset").disabled = True
+        self.query_one("#btn_run").disabled = True
+        lbl = self.query_one("#status_lbl", Label)
+        lbl.update("")
+        lbl.remove_class("status-ready")
+        lbl.remove_class("status-incomplete")
+
+    async def _full_reset(self) -> None:
+        self._current_cmd = None
+        self._cursor = None
+        self._last_args_by_cmd.clear()
+        self.query_one("#cmd_select", Select).clear()
+        self._clear_result_area()
+        self._disable_actions()

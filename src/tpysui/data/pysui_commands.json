@@ -202,7 +202,7 @@
             "validation": "sui_address"
           },
           "optional": false,
-          "default": [],
+          "default": ["0x6", "0x8", "0x403", "0x00c", "0xacc"],
           "source": "owned_objects",
           "multiple": false
         }
@@ -222,7 +222,7 @@
             "validation": "sui_address"
           },
           "optional": false,
-          "default": [],
+          "default": ["0x6", "0x8", "0x403", "0x00c", "0xacc"],
           "source": "owned_objects",
           "multiple": false
         },
@@ -253,7 +253,7 @@
             "validation": "sui_address"
           },
           "optional": false,
-          "default": [],
+          "default": ["0x6", "0x8", "0x403", "0x00c", "0xacc"],
           "source": "owned_objects",
           "multiple": false
         }
@@ -273,7 +273,7 @@
             "validation": "sui_address"
           },
           "optional": false,
-          "default": [],
+          "default": ["0x6", "0x8", "0x403", "0x00c", "0xacc"],
           "source": "owned_objects",
           "multiple": false
         }
@@ -325,7 +325,7 @@
           },
           "optional": false,
           "default": [],
-          "source": "none",
+          "source": "owned_object_types",
           "multiple": false
         }
       ]
@@ -407,13 +407,13 @@
             "shape": "named",
             "fields": [
               {
-                "name": "address",
+                "name": "objectId",
                 "kind": {
                   "type": "scalar",
                   "validation": "sui_address"
                 },
                 "optional": false,
-                "source": "owned_objects"
+                "source": "none"
               },
               {
                 "name": "version",
@@ -448,7 +448,7 @@
             "validation": "sui_address"
           },
           "optional": false,
-          "default": [],
+          "default": ["0x6", "0x8", "0x403", "0x00c", "0xacc"],
           "source": "owned_objects",
           "multiple": false
         }
@@ -588,7 +588,7 @@
             "validation": "sui_address"
           },
           "optional": false,
-          "default": [],
+          "default": ["0x1", "0x2", "0x3", "0xb", "0xdee9"],
           "source": "none",
           "multiple": false
         }
@@ -608,7 +608,7 @@
             "validation": "sui_address"
           },
           "optional": false,
-          "default": [],
+          "default": ["0x1", "0x2", "0x3", "0xb", "0xdee9"],
           "source": "none",
           "multiple": false
         }
@@ -628,7 +628,7 @@
             "validation": "sui_address"
           },
           "optional": false,
-          "default": [],
+          "default": ["0x1", "0x2", "0x3", "0xb", "0xdee9"],
           "source": "none",
           "multiple": false
         },
@@ -659,7 +659,7 @@
             "validation": "sui_address"
           },
           "optional": false,
-          "default": [],
+          "default": ["0x1", "0x2", "0x3", "0xb", "0xdee9"],
           "source": "none",
           "multiple": false
         },
@@ -701,7 +701,7 @@
             "validation": "sui_address"
           },
           "optional": false,
-          "default": [],
+          "default": ["0x1", "0x2", "0x3", "0xb", "0xdee9"],
           "source": "none",
           "multiple": false
         },
@@ -743,7 +743,7 @@
             "validation": "sui_address"
           },
           "optional": false,
-          "default": [],
+          "default": ["0x1", "0x2", "0x3", "0xb", "0xdee9"],
           "source": "none",
           "multiple": false
         },
@@ -774,7 +774,7 @@
             "validation": "sui_address"
           },
           "optional": false,
-          "default": [],
+          "default": ["0x1", "0x2", "0x3", "0xb", "0xdee9"],
           "source": "none",
           "multiple": false
         },
@@ -816,7 +816,7 @@
             "validation": "sui_address"
           },
           "optional": false,
-          "default": [],
+          "default": ["0x1", "0x2", "0x3", "0xb", "0xdee9"],
           "source": "none",
           "multiple": false
         },

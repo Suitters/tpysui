@@ -50,8 +50,8 @@ class AliasInputModal(ModalScreen[str | None]):
             yield Label("Alias:")
             yield Input(value=self._initial, placeholder=self._placeholder, id="input-alias")
             with Horizontal(id="buttons"):
-                yield Button("OK",     variant="success", id="btn-ok")
                 yield Button("Cancel", variant="primary",  id="btn-cancel")
+                yield Button("OK",     variant="success", id="btn-ok")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "btn-ok":
@@ -85,8 +85,8 @@ class ImportAddressModal(ModalScreen[dict | None]):
             yield Label("Private key (base64 or suiprivkey…):")
             yield Input(placeholder="suiprivkey...", id="input-key", password=True)
             with Horizontal(id="buttons"):
-                yield Button("Import", variant="success", id="btn-import")
                 yield Button("Cancel", variant="primary",  id="btn-cancel")
+                yield Button("Import", variant="success", id="btn-import")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "btn-import":

@@ -9,8 +9,8 @@ from dataclasses import replace
 from pathlib import Path
 
 from .base import (
-    ActiveState, ActiveStateChanged, AddressInfo, GroupInfo, GroupProtocol,
-    ObjectSummaryInfo, ProfileInfo, ReadResult, SuiService,
+    ActiveState, ActiveStateChanged, AddressInfo, ChainInfo, GasObjectInfo,
+    GroupInfo, GroupProtocol, ObjectSummaryInfo, ProfileInfo, ReadResult, SuiService,
 )
 
 _FAKE_MNEMONIC = (
@@ -290,6 +290,9 @@ class FauxSuiService(SuiService):
         addr = next((a.address for a in alist if a.alias == alias), None)
         return self._update_active(address_alias=alias, address=addr)
 
+    async def get_chain_info(self) -> ChainInfo:
+        return ChainInfo(chain_id="faux-chain", epoch="0", reference_gas_price="750", validator_count="0")
+
     async def execute_read(self, command_name: str, kwargs: dict, cursor: bytes | None) -> ReadResult:
         await asyncio.sleep(0.05)
         return ReadResult(
@@ -315,3 +318,14 @@ class FauxSuiService(SuiService):
             ObjectSummaryInfo(object_id="0x" + "aa" * 32, object_type="0x2::coin::Coin<0x2::sui::SUI>"),
             ObjectSummaryInfo(object_id="0x" + "bb" * 32, object_type="0x2::coin::Coin<0x2::sui::SUI>"),
         ]
+
+    async def get_gas_objects(self, owner: str) -> list[GasObjectInfo]:
+        await asyncio.sleep(0.05)
+        return [
+            GasObjectInfo(object_id="0x" + "aa" * 32, balance="1000000000"),
+            GasObjectInfo(object_id="0x" + "bb" * 32, balance="2500000000"),
+        ]
+
+    async def get_coin_balances(self, owner: str) -> str:
+        await asyncio.sleep(0.05)
+        return '{"balances": [{"coin_type": "0x2::sui::SUI", "total_balance": "3500000000"}]}'

@@ -20,8 +20,8 @@ class ConfirmModal(ModalScreen[bool]):
         with Vertical(id="dialog"):
             yield Label(self._message, id="message")
             with Horizontal(id="buttons"):
-                yield Button("Delete", variant="error",   id="btn-confirm")
                 yield Button("Cancel", variant="primary", id="btn-cancel")
+                yield Button("Delete", variant="error",   id="btn-confirm")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         self.dismiss(event.button.id == "btn-confirm")

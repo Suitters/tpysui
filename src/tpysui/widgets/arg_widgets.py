@@ -10,7 +10,7 @@ from typing import Any, Callable
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.widget import Widget
-from textual.widgets import Checkbox, Input, Label, Select
+from textual.widgets import Checkbox, Input, Label, Select, Switch
 
 from ..services.base import AddressInfo, ObjectSummaryInfo
 from ..utils.validators import valid_sui_address
@@ -315,4 +315,105 @@ class ForVersionsWidget(Widget):
         for p in parts:
             if not p.isdigit():
                 return f"for_versions: '{p}' is not an unsigned int"
+        return None
+
+
+class DefaultSelect(Widget):
+    """Select from static default options + Other → Input fallback."""
+
+    def __init__(
+        self,
+        label: str,
+        defaults: list[str],
+        optional: bool = False,
+        initial_value: str = "",
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(**kwargs)
+        self._arg_name = label
+        self._defaults = list(defaults)
+        self._optional = optional
+        self._initial_value = initial_value
+
+    def compose(self) -> ComposeResult:
+        options: list[tuple[str, str]] = [(v, v) for v in self._defaults]
+        options.append(("Other…", _OTHER))
+        with Horizontal():
+            yield Label(f"{self._arg_name}:")
+            yield Select(options, id="sel", allow_blank=True)
+            yield Input(id="other_inp", placeholder="enter value…")
+
+    def on_mount(self) -> None:
+        inp = self.query_one("#other_inp", Input)
+        inp.display = False
+        sel = self.query_one(Select)
+        if self._initial_value:
+            if self._initial_value in self._defaults:
+                sel.value = self._initial_value
+            else:
+                sel.value = _OTHER
+                inp.value = self._initial_value
+                inp.display = True
+        elif self._defaults:
+            sel.value = self._defaults[0]
+
+    def populate_extra(self, options: list[tuple[str, str]]) -> None:
+        """Prepend dynamic options before the static defaults."""
+        sel = self.query_one(Select)
+        current = sel.value
+        all_opts: list[tuple[str, str]] = list(options)
+        all_opts.extend((v, v) for v in self._defaults)
+        all_opts.append(("Other…", _OTHER))
+        sel.set_options(all_opts)
+        dynamic_values = {v for _, v in options}
+        if current in dynamic_values:
+            sel.value = current
+        elif options:
+            sel.value = options[0][1]
+        elif all_opts:
+            sel.value = all_opts[0][1]
+
+    def on_select_changed(self, event: Select.Changed) -> None:
+        self.query_one("#other_inp", Input).display = (event.value == _OTHER)
+
+    def get_value(self) -> str | None:
+        sel = self.query_one(Select)
+        if sel.value == _OTHER:
+            v = self.query_one("#other_inp", Input).value.strip()
+            return v or None
+        if sel.value is Select.BLANK:
+            return None
+        return str(sel.value)
+
+    def validate(self) -> str | None:
+        v = self.get_value()
+        if v is None and not self._optional:
+            return f"{self._arg_name}: required"
+        return None
+
+
+class BoolToggle(Widget):
+    """Switch widget for boolean args."""
+
+    def __init__(
+        self,
+        label: str,
+        optional: bool = False,
+        initial_value: bool = True,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(**kwargs)
+        self._arg_name = label
+        self._optional = optional
+        self._initial_value = initial_value
+
+    def compose(self) -> ComposeResult:
+        with Horizontal():
+            yield Label(f"{self._arg_name}:")
+            yield Switch(value=self._initial_value, id="sw")
+
+    def get_value(self) -> bool:
+        return self.query_one(Switch).value
+
+    def validate(self) -> str | None:
         return None

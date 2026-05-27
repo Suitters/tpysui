@@ -3,23 +3,18 @@
 
 # -*- coding: utf-8 -*-
 
-from pathlib import Path
-
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen
-from textual.widgets import Button, Checkbox, DirectoryTree, Input, Label, Static
+from textual.widgets import Button, Checkbox, Input, Label, Static
 
 from ..constants import SUI_GQL_GROUP, SUI_GRPC_GROUP
 from ..services.base import GroupProtocol
+from .config_picker_modal import ConfigPickerModal
 
 
 class StartupModal(ModalScreen[dict | None]):
     BINDINGS = [("escape", "cancel", "Cancel")]
-
-    def __init__(self, **kwargs) -> None:
-        super().__init__(**kwargs)
-        self._selected_path: str | None = None
 
     def compose(self) -> ComposeResult:
         with Vertical(id="dialog"):
@@ -29,48 +24,15 @@ class StartupModal(ModalScreen[dict | None]):
                 yield Button("Open Existing", variant="primary", id="btn-open")
             with Vertical(id="new-section"):
                 yield Label("Config folder:", classes="field-label")
-                yield Input(placeholder="~/path/to/config/folder", id="new-folder")
+                with Horizontal(id="new-folder-row"):
+                    yield Input(placeholder="~/path/to/config/folder", id="new-folder")
+                    yield Button("Browse…", id="btn-browse-new")
                 yield Label("Initial groups:", classes="field-label")
                 yield Checkbox("GraphQL group", value=True, id="chk-gql")
                 yield Checkbox("gRPC group", value=False, id="chk-grpc")
                 with Horizontal(id="action-buttons"):
                     yield Button("Create", variant="success", id="btn-create")
                     yield Button("Back", id="btn-back-new")
-            with Vertical(id="open-section"):
-                yield Label(
-                    "Browse to the folder containing PysuiConfig.json:",
-                    classes="field-label",
-                )
-                yield DirectoryTree(Path.home(), id="open-tree")
-                yield Static("", id="selected-path")
-                with Horizontal(id="action-buttons"):
-                    yield Button("Open", variant="success", id="btn-open-confirm")
-                    yield Button("Back", id="btn-back-open")
-
-    def on_directory_tree_directory_selected(
-        self, event: DirectoryTree.DirectorySelected
-    ) -> None:
-        path = event.path
-        if (path / "PysuiConfig.json").exists():
-            self._selected_path = str(path)
-            self.query_one("#selected-path", Static).update(
-                f"[green]✓ PysuiConfig.json found in {path.name}[/green]"
-            )
-        else:
-            self._selected_path = None
-            self.query_one("#selected-path", Static).update(
-                "[dim]No PysuiConfig.json in this folder[/dim]"
-            )
-
-    def on_directory_tree_file_selected(
-        self, event: DirectoryTree.FileSelected
-    ) -> None:
-        if event.path.name == "PysuiConfig.json":
-            folder = event.path.parent
-            self._selected_path = str(folder)
-            self.query_one("#selected-path", Static).update(
-                f"[green]✓ PysuiConfig.json found in {folder.name}[/green]"
-            )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         bid = event.button.id
@@ -78,17 +40,22 @@ class StartupModal(ModalScreen[dict | None]):
             self.query_one("#choice-buttons").display = False
             self.query_one("#new-section").display = True
         elif bid == "btn-open":
-            self.query_one("#choice-buttons").display = False
-            self.query_one("#open-section").display = True
-        elif bid in ("btn-back-new", "btn-back-open"):
+            self.app.push_screen(ConfigPickerModal(), self._on_config_picked)
+        elif bid == "btn-back-new":
             self.query_one("#choice-buttons").display = True
             self.query_one("#new-section").display = False
-            self.query_one("#open-section").display = False
-            self._selected_path = None
+        elif bid == "btn-browse-new":
+            self.app.push_screen(ConfigPickerModal(require_config=False), self._on_folder_browsed)
         elif bid == "btn-create":
             self._submit_new()
-        elif bid == "btn-open-confirm":
-            self._submit_open()
+
+    def _on_config_picked(self, path: str | None) -> None:
+        if path:
+            self.dismiss({"action": "open", "path": path})
+
+    def _on_folder_browsed(self, path: str | None) -> None:
+        if path:
+            self.query_one("#new-folder", Input).value = path
 
     def _submit_new(self) -> None:
         folder = self.query_one("#new-folder", Input).value.strip()
@@ -112,14 +79,6 @@ class StartupModal(ModalScreen[dict | None]):
                 {"name": SUI_GRPC_GROUP, "protocol": GroupProtocol.GRPC, "make_active": first}
             )
         self.dismiss({"action": "new", "folder": folder, "init_groups": init_groups})
-
-    def _submit_open(self) -> None:
-        if not self._selected_path:
-            self.notify(
-                "Select a folder containing PysuiConfig.json", severity="error"
-            )
-            return
-        self.dismiss({"action": "open", "path": self._selected_path})
 
     def action_cancel(self) -> None:
         self.dismiss(None)

@@ -18,7 +18,7 @@
     "Source": {
       "description": "Where the UI pre-populates candidate values for an arg or named-compound field. 'none' means plain text input only.",
       "type": "string",
-      "enum": ["none", "group_addresses", "owned_objects", "owned_coins"]
+      "enum": ["none", "group_addresses", "owned_objects", "owned_coins", "owned_object_types"]
     },
 
     "Validation": {

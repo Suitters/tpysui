@@ -72,8 +72,8 @@ class GroupModal(ModalScreen[dict | None]):
                 )
 
             with Horizontal(id="buttons"):
-                yield Button("Create", variant="success", id="btn-create")
                 yield Button("Cancel", variant="primary",  id="btn-cancel")
+                yield Button("Create", variant="success", id="btn-create")
 
     def on_collapsible_expanded(self, event: Collapsible.Expanded) -> None:
         for col in self.query(Collapsible):

@@ -18,7 +18,7 @@ import tomli_w
 
 @dataclass
 class Settings:
-    faux_mode: bool = True
+    faux_mode: bool = False
     default_config_path: str | None = None
     known_configs: list[dict] = field(default_factory=list)
 
@@ -32,7 +32,7 @@ def load_settings() -> Settings:
     with path.open("rb") as f:
         data = tomllib.load(f)
     return Settings(
-        faux_mode=data.get("dev", {}).get("faux_mode", True),
+        faux_mode=data.get("dev", {}).get("faux_mode", False),
         default_config_path=data.get("configs", {}).get("default"),
         known_configs=data.get("configs", {}).get("known", []),
     )

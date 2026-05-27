@@ -7,10 +7,13 @@
 
 /* ── App Layout ─────────────────────────────────────────── */
 
-#main-row { height: 1fr; }
-#sidebar  { width: 30; border-right: solid $primary; background: $panel; }
-#content  { width: 1fr; height: 100%; }
+#main-row       { height: 1fr; }
+#sidebar-panel  { width: 30; border-right: solid $primary; background: $panel; }
+#sidebar-header { width: 1fr; height: 1; background: $surface-lighten-2; color: $text; text-style: bold; content-align: center middle; }
+#sidebar        { width: 1fr; height: 1fr; padding-top: 1; }
+#content        { width: 1fr; height: 100%; }
 
+#screen-dashboard,
 #screen-config,
 #screen-reads,
 #screen-writes,
@@ -29,6 +32,26 @@ DataTable:focus > .datatable--cursor {
     background: $block-cursor-background;
     color: $block-cursor-foreground;
     text-style: $block-cursor-text-style;
+}
+
+/* ── Global Button Rules ─────────────────────────────────── */
+
+Button {
+    height: 1;
+    padding: 0 2;
+    border: none;
+}
+
+Button#btn-cancel,
+Button#btn_cancel {
+    background: $surface-lighten-2;
+    color: $text;
+}
+
+Button:disabled {
+    background: $background;
+    color: $text-disabled;
+    opacity: 0.6;
 }
 
 /* ── ActiveStateBar ──────────────────────────────────────── */
@@ -64,6 +87,11 @@ ActiveStateBar .state-btn:hover {
     color: $text;
     background: $boost;
 }
+ActiveStateBar .state-key {
+    width: auto;
+    color: $text-muted;
+    padding: 0 0 0 0;
+}
 ActiveStateBar .state-label {
     width: auto;
     color: $text-muted;
@@ -72,6 +100,91 @@ ActiveStateBar .state-label {
 ActiveStateBar .sep {
     color: $primary;
     width: 3;
+}
+
+/* ── DashboardScreen ─────────────────────────────────────── */
+
+DashboardScreen {
+    layout: vertical;
+    height: 1fr;
+    padding: 0 1;
+}
+
+#dashboard_body {
+    height: 1fr;
+    layout: vertical;
+}
+
+#chain_strip {
+    height: 1;
+    align: left middle;
+    background: $boost;
+    padding: 0 1;
+    margin-bottom: 1;
+}
+
+#chain_strip Static {
+    width: auto;
+    padding: 0 1;
+    color: $text;
+}
+
+.dash_sep {
+    color: $primary;
+    padding: 0;
+}
+
+#dashboard_panels {
+    height: 1fr;
+}
+
+.dash_pane {
+    height: 100%;
+    border: solid $primary;
+}
+
+.dash_pane_title {
+    dock: top;
+    height: 1;
+    background: $boost;
+    padding: 0 1;
+    color: $text-muted;
+}
+
+#dash_gas_pane { width: 1.4fr; }
+#dash_obj_pane { width: 1fr; }
+#dash_bal_pane { width: 2fr; }
+
+DashboardScreen ListView {
+    height: 1fr;
+    scrollbar-size-horizontal: 0;
+}
+
+DashboardScreen ListItem {
+    padding: 0 1;
+}
+
+DashboardScreen #gas_list ListItem > Horizontal {
+    height: 1;
+}
+
+DashboardScreen .gas-item-id {
+    width: 1fr;
+}
+
+DashboardScreen .gas-item-bal {
+    width: auto;
+    color: $success;
+    text-align: right;
+}
+
+#bal_text {
+    height: 1fr;
+}
+
+#bal_text {
+    height: 1fr;
+    border: none;
 }
 
 /* ── ConfigScreen ────────────────────────────────────────── */
@@ -112,11 +225,11 @@ StartupModal #dialog {
     padding: 1 2;
 }
 StartupModal #dialog-title { text-style: bold; margin-bottom: 1; }
-StartupModal #new-section  { display: none; height: auto; }
-StartupModal #open-section { display: none; height: auto; }
-StartupModal .field-label  { color: $text-muted; margin-top: 1; }
-StartupModal DirectoryTree { height: 18; border: solid $accent; margin-top: 1; }
-StartupModal #selected-path { color: $accent; margin-top: 1; height: auto; }
+StartupModal #new-section    { display: none; height: auto; }
+StartupModal #new-folder-row { height: auto; }
+StartupModal #new-folder-row Input  { width: 1fr; }
+StartupModal #new-folder-row Button { width: auto; margin-left: 1; }
+StartupModal .field-label    { color: $text-muted; margin-top: 1; }
 StartupModal #choice-buttons  { align: center middle; height: auto; margin-top: 1; }
 StartupModal #action-buttons  { align: right middle;  height: auto; margin-top: 1; }
 StartupModal Button { margin: 0 1; }
@@ -295,31 +408,51 @@ ReadsScreen {
     width: 50;
 }
 
-#arg_get_row {
+#action_row {
     layout: horizontal;
     height: auto;
+    align: left middle;
     padding: 0 0 1 0;
-    align: left middle;
 }
 
-#args_container {
-    layout: horizontal;
-    height: auto;
-    width: 1fr;
-    align: left middle;
-}
-
-#btn_get {
+#btn_args {
     width: auto;
+    margin-right: 1;
 }
 
-#status_label {
-    height: 1;
+#status_lbl {
+    width: 1fr;
     padding: 0 1;
+}
+
+#status_lbl.status-ready {
     color: $success;
 }
 
-#status_label.error {
+#status_lbl.status-incomplete {
+    color: $warning;
+    text-style: italic;
+}
+
+#btn_reset {
+    width: auto;
+    margin-right: 1;
+}
+
+#btn_run {
+    width: auto;
+}
+
+#result_status_lbl {
+    height: 1;
+    padding: 0 1;
+}
+
+#result_status_lbl.result-success {
+    color: $success;
+}
+
+#result_status_lbl.result-error {
     color: $error;
 }
 
@@ -328,10 +461,25 @@ ReadsScreen {
     height: 1fr;
 }
 
-#action_row {
-    layout: horizontal;
+#export_row {
+    height: auto;
+    align: center middle;
+    margin-top: 1;
+}
+
+#btn_copy {
+    width: auto;
+    margin-right: 2;
+}
+
+#btn_save_file {
+    width: auto;
+}
+
+#next_row {
     height: 3;
     margin-top: 1;
+    margin-bottom: 1;
 }
 
 #btn_clear {
@@ -343,16 +491,67 @@ ReadsScreen {
     width: auto;
 }
 
+/* ── SaveModal ───────────────────────────────────────── */
+
+SaveModal {
+    align: center middle;
+}
+
+#save_dialog {
+    width: 80;
+    max-height: 80%;
+    border: thick $primary;
+    background: $surface;
+    padding: 1;
+}
+
+#save_title {
+    text-style: bold;
+    text-align: center;
+    color: $primary;
+    margin-bottom: 1;
+}
+
+#dir_tree {
+    height: 20;
+    border: solid $accent;
+    margin-bottom: 1;
+}
+
+#save_filename_row {
+    height: auto;
+    align: left middle;
+    margin-bottom: 1;
+}
+
+#save_filename_row Label {
+    width: auto;
+    padding: 0 1;
+}
+
+#save_filename_row Input {
+    width: 1fr;
+}
+
+#save_buttons {
+    height: auto;
+    align: right middle;
+}
+
+#save_buttons Button {
+    margin-left: 1;
+}
+
 /* ── Arg widgets ─────────────────────────────────────── */
 
 PlainInput {
     height: auto;
-    width: auto;
+    width: 1fr;
 }
 
 PlainInput > Horizontal {
     height: auto;
-    width: auto;
+    width: 1fr;
     align: left middle;
 }
 
@@ -362,17 +561,17 @@ PlainInput Label {
 }
 
 PlainInput Input {
-    width: 42;
+    width: 1fr;
 }
 
 MultiValueInput {
     height: auto;
-    width: auto;
+    width: 1fr;
 }
 
 MultiValueInput > Horizontal {
     height: auto;
-    width: auto;
+    width: 1fr;
     align: left middle;
 }
 
@@ -382,17 +581,17 @@ MultiValueInput Label {
 }
 
 MultiValueInput Input {
-    width: 42;
+    width: 1fr;
 }
 
 AddressSelect {
     height: auto;
-    width: auto;
+    width: 1fr;
 }
 
 AddressSelect > Horizontal {
     height: auto;
-    width: auto;
+    width: 1fr;
     align: left middle;
 }
 
@@ -402,21 +601,21 @@ AddressSelect Label {
 }
 
 AddressSelect Select {
-    width: 42;
+    width: 1fr;
 }
 
 AddressSelect #other_inp {
-    width: 42;
+    width: 1fr;
 }
 
 ObjectSelect {
     height: auto;
-    width: auto;
+    width: 1fr;
 }
 
 ObjectSelect > Horizontal {
     height: auto;
-    width: auto;
+    width: 1fr;
     align: left middle;
 }
 
@@ -426,11 +625,11 @@ ObjectSelect Label {
 }
 
 ObjectSelect Select {
-    width: 42;
+    width: 1fr;
 }
 
 ObjectSelect #other_inp {
-    width: 42;
+    width: 1fr;
 }
 
 ObjectChecklist {
@@ -447,35 +646,201 @@ ObjectChecklist #checklist {
 
 ObjectChecklist Horizontal {
     height: auto;
-    width: auto;
+    width: 1fr;
     align: left middle;
 }
 
 ObjectChecklist #other_inp {
-    width: 42;
+    width: 1fr;
 }
 
 ForVersionsWidget {
     height: auto;
-    width: auto;
+    width: 1fr;
     border: solid $accent;
     padding: 0 1;
 }
 
 ForVersionsWidget Horizontal {
     height: auto;
-    width: auto;
+    width: 1fr;
     align: left middle;
 }
 
 ForVersionsWidget #obj_sel {
-    width: 42;
+    width: 1fr;
 }
 
 ForVersionsWidget #other_inp {
-    width: 42;
+    width: 1fr;
 }
 
 ForVersionsWidget #versions_inp {
     width: 20;
 }
+
+/* ── DefaultSelect ───────────────────────────────────── */
+
+DefaultSelect {
+    height: auto;
+    width: 1fr;
+}
+
+DefaultSelect > Horizontal {
+    height: auto;
+    width: 1fr;
+    align: left middle;
+}
+
+DefaultSelect Label {
+    width: auto;
+    padding: 0 1;
+}
+
+DefaultSelect Select {
+    width: 1fr;
+}
+
+DefaultSelect #other_inp {
+    width: 1fr;
+}
+
+/* ── BoolToggle ──────────────────────────────────────── */
+
+BoolToggle {
+    height: auto;
+    width: 1fr;
+}
+
+BoolToggle > Horizontal {
+    height: auto;
+    width: 1fr;
+    align: left middle;
+}
+
+BoolToggle Label {
+    width: auto;
+    padding: 0 1;
+}
+
+/* ── MultipleRow ─────────────────────────────────────── */
+
+MultipleRow {
+    height: auto;
+    width: 1fr;
+}
+
+MultipleRow > Horizontal {
+    height: auto;
+    width: 1fr;
+    align: left middle;
+}
+
+MultipleRow Label {
+    width: auto;
+    padding: 0 1;
+}
+
+/* ── ArgsModal ───────────────────────────────────────── */
+
+ArgsModal { align: center middle; }
+
+ArgsModal #args_dialog {
+    width: 80%;
+    height: auto;
+    max-height: 80%;
+    border: thick $primary;
+    background: $surface;
+    padding: 1 2;
+}
+
+ArgsModal #modal_title {
+    text-style: bold;
+    text-align: center;
+    color: $primary;
+    margin-bottom: 1;
+}
+
+ArgsModal #args_scroll {
+    width: 1fr;
+    height: auto;
+    max-height: 36;
+}
+
+ArgsModal #modal_buttons {
+    align: right middle;
+    height: auto;
+    margin-top: 1;
+}
+
+ArgsModal #modal_buttons Button { margin-left: 1; }
+
+/* ── CollectorModal ──────────────────────────────────── */
+
+CollectorModal { align: center middle; }
+
+CollectorModal #collector_dialog {
+    width: 72;
+    height: auto;
+    max-height: 80%;
+    border: thick $primary;
+    background: $surface;
+    padding: 1 2;
+}
+
+CollectorModal #collector_title {
+    text-style: bold;
+    text-align: center;
+    color: $primary;
+    margin-bottom: 1;
+}
+
+CollectorModal #entries_scroll {
+    height: auto;
+    max-height: 14;
+    border: solid $accent;
+}
+
+CollectorModal #staging_area {
+    height: auto;
+    margin-top: 1;
+    border: solid $primary-darken-2;
+    padding: 0 1 1 1;
+}
+
+CollectorModal .staging_label {
+    color: $text-muted;
+    height: 1;
+    margin-bottom: 1;
+}
+
+CollectorModal .staging_row {
+    height: auto;
+    align: left middle;
+    margin-bottom: 1;
+}
+
+CollectorModal .staging_row Label {
+    width: 16;
+    padding: 0 1;
+}
+
+CollectorModal .staging_row Input {
+    width: 42;
+}
+
+CollectorModal #collector_add_buttons {
+    height: auto;
+    align: left middle;
+    margin-top: 1;
+}
+
+CollectorModal #collector_add_buttons Button { margin-right: 1; }
+
+CollectorModal #collector_buttons {
+    align: right middle;
+    height: auto;
+    margin-top: 1;
+}
+
+CollectorModal #collector_buttons Button { margin-left: 1; }

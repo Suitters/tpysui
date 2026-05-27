@@ -9,6 +9,7 @@ from textual.widgets import Tree
 
 class Sidebar(Tree[str]):
     AREAS = [
+        ("Dashboard",                 "screen-dashboard"),
         ("Configuration & Key Mgmt", "screen-config"),
         ("Data Reads",               "screen-reads"),
         ("Data Writes",              "screen-writes"),
@@ -16,11 +17,12 @@ class Sidebar(Tree[str]):
         ("UCI Command Development",  "screen-uci"),
     ]
     _DESCRIPTIONS = {
-        "screen-config": "Manage groups, profiles, and addresses in your PysuiConfig",
-        "screen-reads":  "Query on-chain data: objects, balances, events, and more",
-        "screen-writes": "Submit transactions: transfers, coin management, and contract calls",
-        "screen-tx":     "Build and inspect Programmable Transaction Blocks (PTBs)",
-        "screen-uci":    "Develop and test UCI commands interactively",
+        "screen-dashboard": "Active address overview: gas objects, owned objects, coin balances, chain info",
+        "screen-config":    "Manage groups, profiles, and addresses in your PysuiConfig",
+        "screen-reads":     "Query on-chain data: objects, balances, events, and more",
+        "screen-writes":    "Submit transactions: transfers, coin management, and contract calls",
+        "screen-tx":        "Build and inspect Programmable Transaction Blocks (PTBs)",
+        "screen-uci":       "Develop and test UCI commands interactively",
     }
 
     class AreaSelected(Message):

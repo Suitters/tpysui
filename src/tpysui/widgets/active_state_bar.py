@@ -36,31 +36,53 @@ class ActiveStateBar(Widget):
     class GroupChangeRequested(Message):
         pass
 
+    class ProfileChangeRequested(Message):
+        pass
+
+    class AddressChangeRequested(Message):
+        pass
+
     state: reactive[ActiveState | None] = reactive(None)
 
     def compose(self) -> ComposeResult:
         with Horizontal(id="title-row"):
             yield Static("tpysui", id="title-text")
         with Horizontal(id="state-row"):
+            yield Static("Config:", classes="state-key")
             yield _StateField(
                 "", id="btn-config", classes="state-btn",
                 on_click_cb=self._on_config_click,
             )
             yield Static("·", classes="sep")
+            yield Static("Group:", classes="state-key")
             yield _StateField(
                 "", id="btn-group", classes="state-btn",
                 on_click_cb=self._on_group_click,
             )
             yield Static("·", classes="sep")
-            yield Static("-", id="bar-profile", classes="state-label")
+            yield Static("Profile:", classes="state-key")
+            yield _StateField(
+                "", id="bar-profile", classes="state-btn",
+                on_click_cb=self._on_profile_click,
+            )
             yield Static("·", classes="sep")
-            yield Static("-", id="bar-address", classes="state-label")
+            yield Static("Address:", classes="state-key")
+            yield _StateField(
+                "", id="bar-address", classes="state-btn",
+                on_click_cb=self._on_address_click,
+            )
 
     def _on_config_click(self) -> None:
         self.post_message(self.ConfigChangeRequested())
 
     def _on_group_click(self) -> None:
         self.post_message(self.GroupChangeRequested())
+
+    def _on_profile_click(self) -> None:
+        self.post_message(self.ProfileChangeRequested())
+
+    def _on_address_click(self) -> None:
+        self.post_message(self.AddressChangeRequested())
 
     def set_area(self, label: str) -> None:
         self.query_one("#title-text", Static).update(f"tpysui ({label})")
@@ -80,14 +102,15 @@ class ActiveStateBar(Widget):
         grp_field.update(state.group_name or "-")
         grp_field.tooltip = "Active group — click to switch"
 
-        prof = self.query_one("#bar-profile", Static)
+        prof = self.query_one("#bar-profile", _StateField)
         prof.update(state.profile_name or "-")
-        prof.tooltip = state.profile_url or "Active profile"
+        prof.tooltip = f"{state.profile_url or 'Active profile'}\n(click to switch)"
 
         addr = _short_addr(state.address)
         alias = state.address_alias or "-"
-        addr_field = self.query_one("#bar-address", Static)
+        addr_field = self.query_one("#bar-address", _StateField)
         addr_field.update(f"{alias} ({addr})")
+        addr_field.tooltip = "Active address — click to switch"
 
 
 def _short_addr(a: str | None) -> str:

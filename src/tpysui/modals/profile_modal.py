@@ -30,8 +30,8 @@ class ProfileModal(ModalScreen[dict | None]):
             yield Label("URL:")
             yield Input(value=self._init_url, placeholder="https://...", id="input-url")
             with Horizontal(id="buttons"):
-                yield Button("Save",   variant="success", id="btn-save")
                 yield Button("Cancel", variant="primary",  id="btn-cancel")
+                yield Button("Save",   variant="success", id="btn-save")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "btn-save":

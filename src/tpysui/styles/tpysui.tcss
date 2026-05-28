@@ -16,7 +16,7 @@
 #screen-dashboard,
 #screen-config,
 #screen-reads,
-#screen-writes,
+#screen-utilities,
 #screen-tx,
 #screen-uci {
     width: 1fr;

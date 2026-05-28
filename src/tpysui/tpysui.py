@@ -20,7 +20,7 @@ from .widgets.active_state_bar import ActiveStateBar
 from .screens.config_screen import ConfigScreen
 from .screens.dashboard_screen import DashboardScreen
 from .screens.reads_screen import ReadsScreen
-from .screens.writes_screen import WritesScreen
+from .screens.utilities_screen import UtilitiesScreen
 from .screens.tx_screen import TxScreen
 from .screens.uci_screen import UciScreen
 
@@ -29,7 +29,7 @@ _AREA_LABELS = {
     "screen-dashboard": "Dashboard",
     "screen-config":    "Config",
     "screen-reads":     "Data Reads",
-    "screen-writes":    "Data Writes",
+    "screen-utilities": "Utilities",
     "screen-tx":        "Tx Builder",
     "screen-uci":       "UCI Dev",
 }
@@ -50,7 +50,7 @@ class TpysuiApp(App):
         ("ctrl+1", "area_1", "Dashboard"),
         ("ctrl+2", "area_2", "Config"),
         ("ctrl+3", "area_3", "Data Reads"),
-        ("ctrl+4", "area_4", "Data Writes"),
+        ("ctrl+4", "area_4", "Utilities"),
         ("ctrl+5", "area_5", "Tx Builder"),
         ("ctrl+6", "area_6", "UCI Dev"),
     ]
@@ -69,7 +69,7 @@ class TpysuiApp(App):
                 yield DashboardScreen(id="screen-dashboard")
                 yield ConfigScreen(id="screen-config")
                 yield ReadsScreen(id="screen-reads")
-                yield WritesScreen(id="screen-writes")
+                yield UtilitiesScreen(id="screen-utilities")
                 yield TxScreen(id="screen-tx")
                 yield UciScreen(id="screen-uci")
         yield Footer()
@@ -151,7 +151,7 @@ class TpysuiApp(App):
         self._switch_area("screen-reads")
 
     def action_area_4(self) -> None:
-        self._switch_area("screen-writes")
+        self._switch_area("screen-utilities")
 
     def action_area_5(self) -> None:
         self._switch_area("screen-tx")

@@ -8,6 +8,6 @@ from textual.widget import Widget
 from textual.widgets import Static
 
 
-class WritesScreen(Widget):
+class UtilitiesScreen(Widget):
     def compose(self) -> ComposeResult:
-        yield Static("Data Writes -- arrives in Sprint 6")
+        yield Static("Utilities -- arrives in Sprint 6")

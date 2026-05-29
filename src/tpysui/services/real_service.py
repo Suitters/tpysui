@@ -432,3 +432,329 @@ class RealSuiService(SuiService):
             return result.result_data.to_json(indent=2)
         except Exception:
             return ""
+
+    async def run_utility(self, name: str, args: dict, simulate: bool) -> "UtilityResultDTO":
+        from .base import UtilityResultDTO
+        _handlers = {
+            "transfer-object": self._run_transfer_object,
+            "transfer-sui": self._run_transfer_sui,
+            "pay-sui": self._run_pay_sui,
+            "merge-coin": self._run_merge_coin,
+            "split-coin": self._run_split_coin,
+            "split-coin-equally": self._run_split_coin_equally,
+            "smash-coins": self._run_smash_coins,
+            "splay-coins": self._run_splay_coins,
+            "coin-to-account": self._run_coin_to_account,
+            "account-to-coin": self._run_account_to_coin,
+            "move-struct-to-bcs": self._run_move_struct_to_bcs,
+        }
+        handler = _handlers.get(name)
+        if handler is None:
+            return UtilityResultDTO(
+                simulated=simulate, success=False,
+                error=f"'{name}' not yet implemented",
+                digest=None, gas_used=None,
+                mutated=[], created=[], deleted=[], events=[], raw_json="",
+            )
+        try:
+            return await handler(args, simulate)
+        except Exception as exc:
+            return UtilityResultDTO(
+                simulated=simulate, success=False,
+                error=str(exc) or f"{type(exc).__name__} (no message)",
+                digest=None, gas_used=None,
+                mutated=[], created=[], deleted=[], events=[], raw_json="",
+            )
+
+    async def _exec_or_sim(self, txer, client, args: dict, simulate: bool) -> "UtilityResultDTO":
+        from pysui.sui.sui_common import sui_commands as _sc
+        gas_mode = args.get("gas_mode", "Use Gas Coin")
+        budget = args.get("budget")
+        gas_list = args.get("gas") or None
+        owner = args.get("owner", "")
+        if simulate:
+            tx_kind = txer.raw_kind()
+            sim_cmd = _sc.SimulateTransactionKind(
+                tx_kind, {"sender": owner}, checks_enabled=True,
+            )
+            result = await client.execute(command=sim_cmd)
+        else:
+            build_result = await txer.build_and_sign(
+                gas_budget=int(budget) if budget else None,
+                use_gas_objects=gas_list if gas_list else None,
+                use_account_for_gas=(gas_mode == "Use Account Balance"),
+                auto_gas=(gas_mode == "Auto Select"),
+            )
+            tx_bytes = build_result["tx_bytestr"]
+            sigs = build_result["sig_array"]
+            exec_cmd = _sc.ExecuteTransaction(tx_bytestr=tx_bytes, sig_array=sigs)
+            result = await client.execute(command=exec_cmd)
+        return self._parse_utility_result(result, simulate)
+
+    def _parse_utility_result(self, result, simulate: bool) -> "UtilityResultDTO":
+        from .base import UtilityResultDTO
+        if not result.is_ok():
+            return UtilityResultDTO(
+                simulated=simulate, success=False,
+                error=result.result_string or "Execution failed",
+                digest=None, gas_used=None,
+                mutated=[], created=[], deleted=[], events=[], raw_json="",
+            )
+        data = result.result_data  # ExecutedTransaction proto dataclass
+        raw_json = data.to_json(indent=2) if hasattr(data, "to_json") else str(data)
+        digest = (data.digest or None) if not simulate else None
+        effects = data.effects  # TransactionEffects | None
+        gas_used = None
+        if effects and effects.gas_used:
+            try:
+                computation = int(getattr(effects.gas_used, "computation_cost", 0) or 0)
+                storage = int(getattr(effects.gas_used, "storage_cost", 0) or 0)
+                gas_used = computation + storage
+            except Exception:
+                pass
+        mutated: list[str] = []
+        created: list[str] = []
+        deleted: list[str] = []
+        if effects:
+            for obj in (effects.changed_objects or []):
+                oid = obj.object_id
+                if not oid:
+                    continue
+                op = obj.id_operation
+                if op == 1:    # ChangedObjectIdOperation.NONE — object mutated
+                    mutated.append(str(oid))
+                elif op == 2:  # ChangedObjectIdOperation.CREATED
+                    created.append(str(oid))
+                elif op == 3:  # ChangedObjectIdOperation.DELETED
+                    deleted.append(str(oid))
+        events: list[str] = []
+        try:
+            ev_container = data.events
+            if ev_container:
+                for ev in (getattr(ev_container, "events", None) or []):
+                    events.append(ev.to_json() if hasattr(ev, "to_json") else str(ev))
+        except Exception:
+            pass
+        return UtilityResultDTO(
+            simulated=simulate, success=True, error=None,
+            digest=str(digest) if digest else None,
+            gas_used=gas_used,
+            mutated=mutated, created=created, deleted=deleted,
+            events=events, raw_json=raw_json,
+        )
+
+    async def _run_transfer_object(self, args: dict, simulate: bool) -> "UtilityResultDTO":
+        owner = args["owner"]
+        transfers = args.get("transfer", [])
+        recipient = args["recipient"]
+        client = await self._get_read_client()
+        txer = await client.transaction(initial_sender=owner)
+        await txer.transfer_objects(transfers=transfers, recipient=recipient)
+        return await self._exec_or_sim(txer, client, args, simulate)
+
+    async def _run_transfer_sui(self, args: dict, simulate: bool) -> "UtilityResultDTO":
+        owner = args["owner"]
+        takes = args.get("takes_from", "Tx Gas")
+        mists = int(args["mists"])
+        recipient = args["recipient"]
+        client = await self._get_read_client()
+        txer = await client.transaction(initial_sender=owner)
+        coin = txer.gas if takes == "Tx Gas" else takes
+        res = await txer.split_coin(coin=coin, amounts=[mists])
+        await txer.transfer_objects(transfers=[res], recipient=recipient)
+        return await self._exec_or_sim(txer, client, args, simulate)
+
+    async def _run_pay_sui(self, args: dict, simulate: bool) -> "UtilityResultDTO":
+        owner = args["owner"]
+        payments = args.get("payments", [])
+        client = await self._get_read_client()
+        txer = await client.transaction(initial_sender=owner)
+        for payment in payments:
+            coin_from = payment.get("coin_from", "Tx Gas")
+            mists = int(payment["mists"])
+            recip = payment["recipient"]
+            coin = txer.gas if coin_from == "Tx Gas" else coin_from
+            res = await txer.split_coin(coin=coin, amounts=[mists])
+            await txer.transfer_objects(transfers=[res], recipient=recip)
+        return await self._exec_or_sim(txer, client, args, simulate)
+
+    async def _run_merge_coin(self, args: dict, simulate: bool) -> "UtilityResultDTO":
+        owner = args["owner"]
+        merge_to = args.get("merge_to", "Tx Gas")
+        coins_to_merge = args.get("coins_to_merge", [])
+        client = await self._get_read_client()
+        txer = await client.transaction(initial_sender=owner)
+        primary = txer.gas if merge_to == "Tx Gas" else merge_to
+        await txer.merge_coins(merge_to=primary, merge_from=coins_to_merge)
+        return await self._exec_or_sim(txer, client, args, simulate)
+
+    async def _run_split_coin(self, args: dict, simulate: bool) -> "UtilityResultDTO":
+        owner = args["owner"]
+        splits_from = args.get("splits_from", "Tx Gas")
+        mists = args.get("mists", [])
+        client = await self._get_read_client()
+        txer = await client.transaction(initial_sender=owner)
+        coin = txer.gas if splits_from == "Tx Gas" else splits_from
+        amounts = [int(m) for m in (mists if isinstance(mists, list) else [mists])]
+        split_res = await txer.split_coin(coin=coin, amounts=amounts)
+        transfers = split_res if len(amounts) > 1 else [split_res]
+        await txer.transfer_objects(transfers=transfers, recipient=owner)
+        return await self._exec_or_sim(txer, client, args, simulate)
+
+    async def _run_split_coin_equally(self, args: dict, simulate: bool) -> "UtilityResultDTO":
+        owner = args["owner"]
+        splits_from = args.get("splits_from", "Tx Gas")
+        split_count = int(args["split_count"])
+        client = await self._get_read_client()
+        txer = await client.transaction(initial_sender=owner)
+        coin = txer.gas if splits_from == "Tx Gas" else splits_from
+        await txer.split_coin_equal(coin=coin, split_count=split_count)
+        return await self._exec_or_sim(txer, client, args, simulate)
+
+    async def _run_smash_coins(self, args: dict, simulate: bool) -> "UtilityResultDTO":
+        from pysui.sui.sui_common import async_funcs as asfn
+        from .base import UtilityResultDTO
+        owner = args["owner"]
+        exclude = args.get("exclude") or []
+        client = await self._get_read_client()
+        op_status, effects, gas_coin_id, exec_result = await asfn.merge_sui(
+            client=client, address=owner, merge_only=None, exclude=exclude, wait=False,
+        )
+        success = str(op_status).lower() not in ("failed", "error", "ops_fail")
+        if effects is not None:
+            raw_json = effects.to_json(indent=2) if hasattr(effects, "to_json") else str(effects)
+        else:
+            raw_json = ""
+        return UtilityResultDTO(
+            simulated=False, success=success,
+            error=None if success else str(op_status),
+            digest=None, gas_used=None,
+            mutated=[], created=[], deleted=[], events=[], raw_json=raw_json,
+        )
+
+    async def _run_splay_coins(self, args: dict, simulate: bool) -> "UtilityResultDTO":
+        from pysui.sui.sui_common import async_funcs as asfn
+        from .base import UtilityResultDTO
+        owner = args["owner"]
+        exclude = args.get("exclude") or []
+        mist = args.get("mist")
+        number = args.get("number")
+        recipients = args.get("recipients") or []
+        if number and recipients:
+            return UtilityResultDTO(
+                simulated=False, success=False,
+                error="number and recipients are mutually exclusive",
+                digest=None, gas_used=None,
+                mutated=[], created=[], deleted=[], events=[], raw_json="",
+            )
+        if not number and not recipients:
+            return UtilityResultDTO(
+                simulated=False, success=False,
+                error="Must provide either number or recipients",
+                digest=None, gas_used=None,
+                mutated=[], created=[], deleted=[], events=[], raw_json="",
+            )
+        if number and int(number) < 2:
+            return UtilityResultDTO(
+                simulated=False, success=False,
+                error="number must be >= 2",
+                digest=None, gas_used=None,
+                mutated=[], created=[], deleted=[], events=[], raw_json="",
+            )
+        client = await self._get_read_client()
+        op_status, effects, gas_coin_id, exec_result = await asfn.merge_sui(
+            client=client, address=owner, merge_only=None, exclude=exclude, wait=False,
+        )
+        success = str(op_status).lower() not in ("failed", "error", "ops_fail")
+        if not success:
+            return UtilityResultDTO(
+                simulated=False, success=False, error=str(op_status),
+                digest=None, gas_used=None,
+                mutated=[], created=[], deleted=[], events=[], raw_json="",
+            )
+        gas_bal = 0
+        if not mist:
+            gas_result = await client.execute_for_all(command=_sc.GetGas(owner=owner))
+            if gas_result.is_ok():
+                coins = list(getattr(gas_result.result_data, "objects", None) or [])
+                for c in coins:
+                    if c.object_id == gas_coin_id:
+                        gas_bal = int(c.balance or 0)
+                        break
+        txer = await client.transaction(initial_sender=owner)
+        if number:
+            count = int(number)
+            gas_reserve = count * 1_988_000
+            distro = int(mist) if mist else int((gas_bal - gas_reserve) / count)
+            amounts = [distro] * count
+            r_coins = await txer.split_coin(coin=txer.gas, amounts=amounts)
+            await txer.transfer_objects(transfers=r_coins, recipient=owner)
+        else:
+            r_count = len(recipients)
+            gas_reserve = r_count * 1_988_000
+            distro = int(mist) if mist else int((gas_bal - gas_reserve) / r_count)
+            if r_count == 1:
+                r_coin = await txer.split_coin(coin=txer.gas, amounts=[distro])
+                await txer.transfer_objects(transfers=[r_coin], recipient=recipients[0])
+            else:
+                amounts = [distro] * r_count
+                r_coins = await txer.split_coin(coin=txer.gas, amounts=amounts)
+                for idx, recip in enumerate(recipients):
+                    await txer.transfer_objects(transfers=[r_coins[idx]], recipient=recip)
+        return await self._exec_or_sim(txer, client, args, simulate=simulate)
+
+    async def _run_coin_to_account(self, args: dict, simulate: bool) -> "UtilityResultDTO":
+        owner = args["owner"]
+        coin_from = args.get("coin_from", "Tx Gas")
+        amount = int(args["amount"])
+        recipient = args.get("recipient", owner)
+        client = await self._get_read_client()
+        txer = await client.transaction(initial_sender=owner)
+        coin = txer.gas if coin_from == "Tx Gas" else coin_from
+        split_res = await txer.split_coin(coin=coin, amounts=[amount])
+        await txer.fund_address_accumulator(funds=split_res, recipient=recipient)
+        return await self._exec_or_sim(txer, client, args, simulate)
+
+    async def _run_account_to_coin(self, args: dict, simulate: bool) -> "UtilityResultDTO":
+        from pysui.sui.sui_common.trxn_base import FundsSource
+        owner = args["owner"]
+        amount = args.get("amount")
+        client = await self._get_read_client()
+        txer = await client.transaction(initial_sender=owner)
+        amt = int(amount) if amount else None
+        result = await txer.coin_from_address_accumulator(source=FundsSource.SENDER, amount=amt)
+        await txer.transfer_objects(transfers=[result], recipient=owner)
+        return await self._exec_or_sim(txer, client, args, simulate)
+
+    async def _run_move_struct_to_bcs(self, args: dict, simulate: bool) -> "UtilityResultDTO":
+        import json as _json
+        from pathlib import Path
+        from pysui.sui.sui_common.move_to_bcs import MoveDataType
+        import pysui.sui.sui_common.mtobcs_types as mtypes
+        from .base import UtilityResultDTO
+        directive_file = args.get("directive_file", "")
+        if not directive_file or not Path(directive_file).exists():
+            return UtilityResultDTO(
+                simulated=False, success=False,
+                error="Directive file not found or not set",
+                digest=None, gas_used=None,
+                mutated=[], created=[], deleted=[], events=[], raw_json="",
+            )
+        json_data = _json.loads(Path(directive_file).read_text(encoding="utf-8"))
+        package_targets = mtypes.Targets.load_declarations(json_data)
+        client = await self._get_read_client()
+        generated = []
+        for package in package_targets.targets:
+            mst = MoveDataType(client=client, target=package)
+            await mst.parse_move_target()
+            await mst.compile_bcs()
+            bcs_py = await mst.emit_bcs_source()
+            out_path = Path(package.out_file)
+            out_path.write_text(bcs_py, encoding="utf-8")
+            generated.append(str(out_path))
+        return UtilityResultDTO(
+            simulated=False, success=True, error=None,
+            digest=None, gas_used=None,
+            mutated=[], created=generated, deleted=[], events=[],
+            raw_json=_json.dumps({"generated": generated}, indent=2),
+        )

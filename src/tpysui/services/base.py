@@ -97,6 +97,20 @@ class CommandInfo:
     pageable: bool
 
 
+@dataclass(frozen=True)
+class UtilityResultDTO:
+    simulated: bool
+    success: bool
+    error: str | None
+    digest: str | None
+    gas_used: int | None
+    mutated: list[str]
+    created: list[str]
+    deleted: list[str]
+    events: list[dict]
+    raw_json: str
+
+
 class ActiveStateChanged(Message):
     """Posted when the active group/profile/address changes."""
 
@@ -178,6 +192,11 @@ class SuiService(ABC):
 
     @abstractmethod
     async def get_coin_balances(self, owner: str) -> str: ...
+
+    @abstractmethod
+    async def run_utility(
+        self, name: str, args: dict, simulate: bool
+    ) -> "UtilityResultDTO": ...
 
     @abstractmethod
     async def aclose(self) -> None: ...

@@ -550,14 +550,16 @@ PlainInput {
 }
 
 PlainInput > Horizontal {
-    height: auto;
+    height: 3;
     width: 1fr;
     align: left middle;
 }
 
 PlainInput Label {
     width: auto;
+    height: 3;
     padding: 0 1;
+    content-align: left middle;
 }
 
 PlainInput Input {
@@ -590,14 +592,16 @@ AddressSelect {
 }
 
 AddressSelect > Horizontal {
-    height: auto;
+    height: 3;
     width: 1fr;
     align: left middle;
 }
 
 AddressSelect Label {
     width: auto;
+    height: 3;
     padding: 0 1;
+    content-align: left middle;
 }
 
 AddressSelect Select {
@@ -614,14 +618,16 @@ ObjectSelect {
 }
 
 ObjectSelect > Horizontal {
-    height: auto;
+    height: 3;
     width: 1fr;
     align: left middle;
 }
 
 ObjectSelect Label {
     width: auto;
+    height: 3;
     padding: 0 1;
+    content-align: left middle;
 }
 
 ObjectSelect Select {
@@ -687,14 +693,16 @@ DefaultSelect {
 }
 
 DefaultSelect > Horizontal {
-    height: auto;
+    height: 3;
     width: 1fr;
     align: left middle;
 }
 
 DefaultSelect Label {
     width: auto;
+    height: 3;
     padding: 0 1;
+    content-align: left middle;
 }
 
 DefaultSelect Select {
@@ -731,14 +739,20 @@ MultipleRow {
 }
 
 MultipleRow > Horizontal {
-    height: auto;
+    height: 3;
     width: 1fr;
     align: left middle;
 }
 
 MultipleRow Label {
     width: auto;
+    height: 3;
     padding: 0 1;
+    content-align: left middle;
+}
+
+MultipleRow Button {
+    height: 3;
 }
 
 /* ── ArgsModal ───────────────────────────────────────── */
@@ -816,21 +830,38 @@ CollectorModal .staging_label {
 
 CollectorModal .staging_row {
     height: auto;
-    align: left middle;
+    align: left top;
     margin-bottom: 1;
 }
 
 CollectorModal .staging_row Label {
     width: 16;
+    height: 3;
     padding: 0 1;
+    content-align: left middle;
+}
+
+CollectorModal .staging_field_col {
+    width: 1fr;
+    height: auto;
 }
 
 CollectorModal .staging_row Input {
-    width: 42;
+    width: 1fr;
+}
+
+CollectorModal .staging_row Select {
+    width: 1fr;
+}
+
+CollectorModal .staging_error_lbl {
+    color: $error;
+    height: 1;
+    padding: 0 1;
 }
 
 CollectorModal #collector_add_buttons {
-    height: auto;
+    height: 3;
     align: left middle;
     margin-top: 1;
 }
@@ -839,8 +870,321 @@ CollectorModal #collector_add_buttons Button { margin-right: 1; }
 
 CollectorModal #collector_buttons {
     align: right middle;
-    height: auto;
+    height: 3;
     margin-top: 1;
 }
 
 CollectorModal #collector_buttons Button { margin-left: 1; }
+
+/* ── ArgsModal write-mode section labels ─────────────────── */
+
+ArgsModal .args_section_label {
+    color: $text-muted;
+    text-style: italic;
+    height: 1;
+    margin-top: 1;
+    margin-bottom: 0;
+    padding: 0 1;
+}
+
+/* ── UtilitiesScreen ─────────────────────────────────────── */
+
+UtilitiesScreen {
+    layout: vertical;
+    height: 1fr;
+    padding: 0 1;
+}
+
+#util_body {
+    height: 1fr;
+    layout: vertical;
+}
+
+#util_group_row {
+    height: auto;
+    align: center middle;
+    padding: 1 0 0 0;
+    margin-bottom: 1;
+}
+
+#util_group_select {
+    width: 26;
+}
+
+#util_cmd_select {
+    width: 34;
+}
+
+#util_action_row {
+    layout: horizontal;
+    height: auto;
+    align: left middle;
+    padding: 0 0 1 0;
+}
+
+#util_btn_args {
+    width: auto;
+    margin-right: 1;
+}
+
+#util_status_lbl {
+    width: 1fr;
+    padding: 0 1;
+}
+
+#util_status_lbl.status-ready {
+    color: $success;
+}
+
+#util_status_lbl.status-incomplete {
+    color: $warning;
+    text-style: italic;
+}
+
+#util_btn_reset {
+    width: auto;
+    margin-right: 1;
+}
+
+#util_btn_run {
+    width: auto;
+}
+
+#util_result_status_lbl {
+    height: 1;
+    padding: 0 1;
+}
+
+#util_result_status_lbl.status-result-ok {
+    color: $success;
+}
+
+#util_result_status_lbl.status-result-error {
+    color: $error;
+}
+
+#util_result_text {
+    border: solid $primary;
+    height: 1fr;
+}
+
+#util_export_row {
+    height: auto;
+    align: center middle;
+    margin-top: 1;
+}
+
+#util_btn_copy {
+    width: auto;
+    margin-right: 2;
+}
+
+#util_btn_save_file {
+    width: auto;
+}
+
+/* ── UtilityConfirmModal ─────────────────────────────────── */
+
+UtilityConfirmModal { align: center middle; }
+
+UtilityConfirmModal #util_confirm_dialog {
+    width: 70;
+    height: auto;
+    max-height: 60%;
+    border: thick $primary;
+    background: $surface;
+    padding: 1 2;
+}
+
+UtilityConfirmModal #util_confirm_title {
+    text-style: bold;
+    text-align: center;
+    color: $primary;
+    margin-bottom: 1;
+}
+
+UtilityConfirmModal .util_confirm_section {
+    color: $text-muted;
+    height: 1;
+}
+
+UtilityConfirmModal #util_confirm_args_scroll {
+    height: auto;
+    max-height: 16;
+    border: solid $accent;
+    margin: 1 0;
+}
+
+UtilityConfirmModal .util_confirm_arg {
+    height: 1;
+    padding: 0 1;
+}
+
+UtilityConfirmModal .util_confirm_note {
+    color: $warning;
+    text-style: italic;
+    height: 1;
+    margin-bottom: 1;
+}
+
+UtilityConfirmModal #util_confirm_buttons {
+    align: right middle;
+    height: auto;
+    margin-top: 1;
+}
+
+UtilityConfirmModal #util_confirm_buttons Button { margin-left: 1; }
+
+/* ── MtobcsLaunchModal ───────────────────────────────────── */
+
+MtobcsLaunchModal { align: center middle; }
+
+MtobcsLaunchModal #mtobcs_launch_dialog {
+    width: 72;
+    height: auto;
+    background: $surface;
+    border: round $primary;
+    padding: 2 3;
+}
+
+MtobcsLaunchModal #mtobcs_launch_text {
+    text-align: center;
+    margin-bottom: 2;
+}
+
+MtobcsLaunchModal #mtobcs_launch_buttons {
+    height: 3;
+    align: center middle;
+}
+
+MtobcsLaunchModal #mtobcs_launch_buttons Button {
+    height: 3;
+    margin: 0 1;
+    min-width: 20;
+}
+
+/* ── MtobcsModal ─────────────────────────────────────────── */
+
+MtobcsModal { align: center middle; }
+
+MtobcsModal #mtobcs_dialog {
+    width: 85%;
+    max-height: 90%;
+    background: $surface;
+    border: round $primary;
+    padding: 1 2;
+    overflow-y: auto;
+}
+
+MtobcsModal #mtobcs_title {
+    text-align: center;
+    text-style: bold;
+    color: $primary;
+    margin-bottom: 1;
+}
+
+MtobcsModal #mtobcs_config_row {
+    height: 3;
+    margin-bottom: 1;
+}
+
+MtobcsModal #mtobcs_config_row Label {
+    width: 12;
+    height: 3;
+    content-align: left middle;
+}
+
+MtobcsModal #mtobcs_config_row Input { width: 1fr; }
+
+MtobcsModal #mtobcs_config_row Button {
+    width: 8;
+    height: 3;
+    margin-left: 1;
+}
+
+MtobcsModal .mtobcs_section_label {
+    text-style: bold;
+    margin-bottom: 1;
+}
+
+MtobcsModal #targets_table {
+    height: 8;
+    margin-bottom: 1;
+}
+
+MtobcsModal #mtobcs_staging {
+    height: auto;
+    padding: 0 1;
+    margin-bottom: 1;
+}
+
+MtobcsModal .mtobcs_staging_title {
+    text-style: italic;
+    color: $text-muted;
+    height: 1;
+}
+
+MtobcsModal .mtobcs_staging_row {
+    height: 3;
+}
+
+MtobcsModal .mtobcs_staging_row Label {
+    width: 16;
+    height: 3;
+    content-align: left middle;
+}
+
+MtobcsModal .mtobcs_staging_row Input,
+MtobcsModal .mtobcs_staging_row Select { width: 1fr; }
+
+MtobcsModal #mtobcs_generic_params {
+    height: auto;
+    border: solid $secondary;
+    padding: 0 1;
+    margin-top: 1;
+    margin-bottom: 1;
+}
+
+MtobcsModal #params_table {
+    height: 5;
+    margin-bottom: 1;
+}
+
+MtobcsModal #mtobcs_param_buttons {
+    height: 1;
+    margin-bottom: 1;
+}
+
+MtobcsModal #mtobcs_param_buttons Button {
+    height: 1;
+    border: none;
+    padding: 0 1;
+    min-width: 5;
+}
+
+MtobcsModal #btn_browse_outfile {
+    width: 3;
+    min-width: 3;
+    padding: 0;
+}
+
+MtobcsModal #mtobcs_entry_buttons {
+    height: 3;
+    margin-top: 1;
+}
+
+MtobcsModal #mtobcs_entry_buttons Button {
+    height: 3;
+    margin-right: 1;
+}
+
+MtobcsModal #mtobcs_action_buttons {
+    height: 3;
+    align: right middle;
+    margin-top: 1;
+}
+
+MtobcsModal #mtobcs_action_buttons Button {
+    height: 3;
+    margin-left: 1;
+}

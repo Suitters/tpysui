@@ -19,20 +19,22 @@ class SaveModal(ModalScreen[Path | None]):
 
     BINDINGS = [("escape", "action_cancel", "Cancel")]
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, default_filename: str = "result.json", mode: str = "save", **kwargs) -> None:
         super().__init__(**kwargs)
         self._selected_dir: Path = Path.home()
+        self._default_filename = default_filename
+        self._mode = mode
 
     def compose(self) -> ComposeResult:
         with Vertical(id="save_dialog"):
-            yield Label("Save Result", id="save_title")
+            yield Label("Save Result" if self._mode == "save" else "Load File", id="save_title")
             yield DirectoryTree(str(Path.home()), id="dir_tree")
             with Horizontal(id="save_filename_row"):
                 yield Label("Filename:")
-                yield Input(value="result.json", id="filename_inp")
+                yield Input(value=self._default_filename, id="filename_inp")
             with Horizontal(id="save_buttons"):
                 yield Button("Cancel", id="btn_cancel", variant="default")
-                yield Button("Save", id="btn_save", variant="primary")
+                yield Button("Save" if self._mode == "save" else "Load", id="btn_save", variant="primary")
 
     @on(DirectoryTree.DirectorySelected)
     def on_dir_selected(self, event: DirectoryTree.DirectorySelected) -> None:

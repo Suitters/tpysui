@@ -31,6 +31,7 @@ class DashboardScreen(Widget):
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._last_state: ActiveState | None = None
+        self._pending_refresh: bool = False
 
     def compose(self) -> ComposeResult:
         with Vertical(id="dashboard_body"):
@@ -54,13 +55,17 @@ class DashboardScreen(Widget):
                     yield TextArea("", id="bal_text", language="json", read_only=True)
 
     async def on_show(self) -> None:
-        if self._last_state is not None:
-            return
-        state = await self.app.service.active_state()  # type: ignore[attr-defined]
-        self._last_state = state
-        self._load_chain()
-        if state.address:
-            self._load_address_data(state.address)
+        if self._last_state is None:
+            state = await self.app.service.active_state()  # type: ignore[attr-defined]
+            self._last_state = state
+            self._load_chain()
+            if state.address:
+                self._load_address_data(state.address)
+        elif self._pending_refresh:
+            self._pending_refresh = False
+            self._load_chain()
+            if self._last_state.address:
+                self._load_address_data(self._last_state.address)
 
     def notify_state_changed(self, state: ActiveState) -> None:
         self._last_state = state
@@ -68,6 +73,8 @@ class DashboardScreen(Widget):
             self._load_chain()
             if state.address:
                 self._load_address_data(state.address)
+        else:
+            self._pending_refresh = True
 
     @work(exclusive=True, group="dash_chain", exit_on_error=False)
     async def _load_chain(self) -> None:

@@ -327,6 +327,7 @@ class DefaultSelect(Widget):
         defaults: list[str],
         optional: bool = False,
         initial_value: str = "",
+        show_other: bool = True,
         **kwargs: Any,
     ) -> None:
         super().__init__(**kwargs)
@@ -334,10 +335,12 @@ class DefaultSelect(Widget):
         self._defaults = list(defaults)
         self._optional = optional
         self._initial_value = initial_value
+        self._show_other = show_other
 
     def compose(self) -> ComposeResult:
         options: list[tuple[str, str]] = [(v, v) for v in self._defaults]
-        options.append(("Other…", _OTHER))
+        if self._show_other:
+            options.append(("Other…", _OTHER))
         with Horizontal():
             yield Label(f"{self._arg_name}:")
             yield Select(options, id="sel", allow_blank=True)
@@ -358,20 +361,21 @@ class DefaultSelect(Widget):
             sel.value = self._defaults[0]
 
     def populate_extra(self, options: list[tuple[str, str]]) -> None:
-        """Prepend dynamic options before the static defaults."""
+        """Append dynamic options after the static defaults."""
         sel = self.query_one(Select)
         current = sel.value
-        all_opts: list[tuple[str, str]] = list(options)
-        all_opts.extend((v, v) for v in self._defaults)
-        all_opts.append(("Other…", _OTHER))
+        all_opts: list[tuple[str, str]] = [(v, v) for v in self._defaults]
+        all_opts.extend(options)
+        if self._show_other:
+            all_opts.append(("Other…", _OTHER))
         sel.set_options(all_opts)
-        dynamic_values = {v for _, v in options}
-        if current in dynamic_values:
+        all_values = {v for _, v in all_opts}
+        if current is not Select.BLANK and current in all_values:
             sel.value = current
+        elif self._defaults:
+            sel.value = self._defaults[0]
         elif options:
             sel.value = options[0][1]
-        elif all_opts:
-            sel.value = all_opts[0][1]
 
     def on_select_changed(self, event: Select.Changed) -> None:
         self.query_one("#other_inp", Input).display = (event.value == _OTHER)

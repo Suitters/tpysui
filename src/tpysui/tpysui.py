@@ -105,6 +105,7 @@ class TpysuiApp(App):
         self.query_one(ConfigScreen).load()
         self.query_one(ReadsScreen).notify_state_changed(state)
         self.query_one(DashboardScreen).notify_state_changed(state)
+        self.query_one(UtilitiesScreen).notify_state_changed(state)
 
     async def _on_startup_result(self, result: dict | None) -> None:
         if result is None:
@@ -166,6 +167,7 @@ class TpysuiApp(App):
         self.query_one(ActiveStateBar).set_state(msg.state)
         self.query_one(DashboardScreen).notify_state_changed(msg.state)
         self.query_one(ReadsScreen).notify_state_changed(msg.state)
+        self.query_one(UtilitiesScreen).notify_state_changed(msg.state)
 
     async def on_active_state_bar_config_change_requested(
         self, _: ActiveStateBar.ConfigChangeRequested
@@ -210,6 +212,7 @@ class TpysuiApp(App):
         self.query_one(ConfigScreen).load()
         self.query_one(DashboardScreen).notify_state_changed(state)
         self.query_one(ReadsScreen).notify_state_changed(state)
+        self.query_one(UtilitiesScreen).notify_state_changed(state)
 
     async def on_active_state_bar_profile_change_requested(
         self, _: ActiveStateBar.ProfileChangeRequested
@@ -255,6 +258,7 @@ class TpysuiApp(App):
         self.query_one(ConfigScreen).load()
         self.query_one(DashboardScreen).notify_state_changed(state)
         self.query_one(ReadsScreen).notify_state_changed(state)
+        self.query_one(UtilitiesScreen).notify_state_changed(state)
 
     async def _switch_address(self, group_name: str, alias: str) -> None:
         state = await self.service.set_active_address(group_name, alias)
@@ -262,6 +266,7 @@ class TpysuiApp(App):
         self.query_one(ConfigScreen).load()
         self.query_one(DashboardScreen).notify_state_changed(state)
         self.query_one(ReadsScreen).notify_state_changed(state)
+        self.query_one(UtilitiesScreen).notify_state_changed(state)
 
 
 def main() -> None:

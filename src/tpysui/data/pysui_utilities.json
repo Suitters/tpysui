@@ -1,0 +1,666 @@
+{
+  "commands": [
+    {
+      "name": "transfer-object",
+      "source_module": "pysui.sui.sui_common.async_txn",
+      "group": "Transfers",
+      "mode": "write",
+      "pageable": false,
+      "args": [
+        {
+          "name": "owner",
+          "kind": { "type": "scalar", "validation": "sui_address" },
+          "optional": true,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        },
+        {
+          "name": "transfer",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": false,
+          "default": [],
+          "source": "owned_objects",
+          "multiple": true,
+          "min_items": 1
+        },
+        {
+          "name": "recipient",
+          "kind": { "type": "scalar", "validation": "sui_address" },
+          "optional": false,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        },
+        {
+          "name": "gas_mode",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": ["Use Gas Coin", "Use Account Balance", "Auto Select"],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "gas",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": [],
+          "source": "owned_coins",
+          "multiple": true,
+          "min_items": 0
+        },
+        {
+          "name": "budget",
+          "kind": { "type": "scalar", "validation": "unsigned_int" },
+          "optional": true,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "transfer-sui",
+      "source_module": "pysui.sui.sui_common.async_txn",
+      "group": "Transfers",
+      "mode": "write",
+      "pageable": false,
+      "args": [
+        {
+          "name": "owner",
+          "kind": { "type": "scalar", "validation": "sui_address" },
+          "optional": true,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        },
+        {
+          "name": "takes_from",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": false,
+          "default": ["Tx Gas"],
+          "source": "owned_coins",
+          "multiple": false
+        },
+        {
+          "name": "mists",
+          "kind": { "type": "scalar", "validation": "unsigned_int" },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "recipient",
+          "kind": { "type": "scalar", "validation": "sui_address" },
+          "optional": false,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        },
+        {
+          "name": "gas_mode",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": ["Use Gas Coin", "Use Account Balance", "Auto Select"],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "gas",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": [],
+          "source": "owned_coins",
+          "multiple": true,
+          "min_items": 0
+        },
+        {
+          "name": "budget",
+          "kind": { "type": "scalar", "validation": "unsigned_int" },
+          "optional": true,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "pay-sui",
+      "source_module": "pysui.sui.sui_common.async_txn",
+      "group": "Transfers",
+      "mode": "write",
+      "pageable": false,
+      "args": [
+        {
+          "name": "owner",
+          "kind": { "type": "scalar", "validation": "sui_address" },
+          "optional": true,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        },
+        {
+          "name": "payments",
+          "kind": {
+            "type": "compound",
+            "shape": "named",
+            "fields": [
+              {
+                "name": "coin",
+                "kind": { "type": "scalar", "validation": "none" },
+                "optional": false,
+                "source": "owned_coins"
+              },
+              {
+                "name": "mists",
+                "kind": { "type": "scalar", "validation": "unsigned_int" },
+                "optional": false,
+                "source": "none"
+              },
+              {
+                "name": "recipient",
+                "kind": { "type": "scalar", "validation": "sui_address" },
+                "optional": false,
+                "source": "group_addresses"
+              }
+            ]
+          },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": true,
+          "min_items": 1
+        },
+        {
+          "name": "gas_mode",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": ["Use Gas Coin", "Use Account Balance", "Auto Select"],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "gas",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": [],
+          "source": "owned_coins",
+          "multiple": true,
+          "min_items": 0
+        },
+        {
+          "name": "budget",
+          "kind": { "type": "scalar", "validation": "unsigned_int" },
+          "optional": true,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "merge-coin",
+      "source_module": "pysui.sui.sui_common.async_txn",
+      "group": "Coin Management",
+      "mode": "write",
+      "pageable": false,
+      "args": [
+        {
+          "name": "owner",
+          "kind": { "type": "scalar", "validation": "sui_address" },
+          "optional": true,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        },
+        {
+          "name": "merge_to",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": false,
+          "default": ["Tx Gas"],
+          "source": "owned_coins",
+          "multiple": false
+        },
+        {
+          "name": "coins_to_merge",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": false,
+          "default": [],
+          "source": "owned_coins",
+          "multiple": true,
+          "min_items": 1
+        },
+        {
+          "name": "gas_mode",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": ["Use Gas Coin", "Use Account Balance", "Auto Select"],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "gas",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": [],
+          "source": "owned_coins",
+          "multiple": true,
+          "min_items": 0
+        },
+        {
+          "name": "budget",
+          "kind": { "type": "scalar", "validation": "unsigned_int" },
+          "optional": true,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "split-coin",
+      "source_module": "pysui.sui.sui_common.async_txn",
+      "group": "Coin Management",
+      "mode": "write",
+      "pageable": false,
+      "args": [
+        {
+          "name": "owner",
+          "kind": { "type": "scalar", "validation": "sui_address" },
+          "optional": true,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        },
+        {
+          "name": "splits_from",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": ["Tx Gas"],
+          "source": "owned_coins",
+          "multiple": false
+        },
+        {
+          "name": "mists",
+          "kind": { "type": "scalar", "validation": "unsigned_int" },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": true,
+          "min_items": 1
+        },
+        {
+          "name": "gas_mode",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": ["Use Gas Coin", "Use Account Balance", "Auto Select"],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "gas",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": [],
+          "source": "owned_coins",
+          "multiple": true,
+          "min_items": 0
+        },
+        {
+          "name": "budget",
+          "kind": { "type": "scalar", "validation": "unsigned_int" },
+          "optional": true,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "split-coin-equally",
+      "source_module": "pysui.sui.sui_common.async_txn",
+      "group": "Coin Management",
+      "mode": "write",
+      "pageable": false,
+      "args": [
+        {
+          "name": "owner",
+          "kind": { "type": "scalar", "validation": "sui_address" },
+          "optional": true,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        },
+        {
+          "name": "splits_from",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": false,
+          "default": ["Tx Gas"],
+          "source": "owned_coins",
+          "multiple": false
+        },
+        {
+          "name": "split_count",
+          "kind": { "type": "scalar", "validation": "unsigned_int" },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "gas_mode",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": ["Use Gas Coin", "Use Account Balance", "Auto Select"],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "gas",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": [],
+          "source": "owned_coins",
+          "multiple": true,
+          "min_items": 0
+        },
+        {
+          "name": "budget",
+          "kind": { "type": "scalar", "validation": "unsigned_int" },
+          "optional": true,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "smash-coins",
+      "source_module": "pysui.sui.sui_common.async_txn",
+      "group": "Coin Management",
+      "mode": "write",
+      "pageable": false,
+      "args": [
+        {
+          "name": "owner",
+          "kind": { "type": "scalar", "validation": "sui_address" },
+          "optional": true,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        },
+        {
+          "name": "include",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": [],
+          "source": "owned_coins",
+          "multiple": true,
+          "min_items": 0
+        },
+        {
+          "name": "exclude",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": [],
+          "source": "owned_coins",
+          "multiple": true,
+          "min_items": 0
+        },
+        {
+          "name": "gas_mode",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": ["Use Gas Coin", "Use Account Balance", "Auto Select"],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "gas",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": [],
+          "source": "owned_coins",
+          "multiple": true,
+          "min_items": 0
+        },
+        {
+          "name": "budget",
+          "kind": { "type": "scalar", "validation": "unsigned_int" },
+          "optional": true,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "splay-coins",
+      "source_module": "pysui.sui.sui_common.async_txn",
+      "group": "Coin Management",
+      "mode": "write",
+      "pageable": false,
+      "args": [
+        {
+          "name": "owner",
+          "kind": { "type": "scalar", "validation": "sui_address" },
+          "optional": true,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        },
+        {
+          "name": "include",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": [],
+          "source": "owned_coins",
+          "multiple": true,
+          "min_items": 0
+        },
+        {
+          "name": "exclude",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": [],
+          "source": "owned_coins",
+          "multiple": true,
+          "min_items": 0
+        },
+        {
+          "name": "mist",
+          "kind": { "type": "scalar", "validation": "unsigned_int" },
+          "optional": true,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "number",
+          "kind": { "type": "scalar", "validation": "unsigned_int" },
+          "optional": true,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "recipients",
+          "kind": { "type": "scalar", "validation": "sui_address" },
+          "optional": true,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": true,
+          "min_items": 0
+        },
+        {
+          "name": "gas_mode",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": ["Use Gas Coin", "Use Account Balance", "Auto Select"],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "gas",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": [],
+          "source": "owned_coins",
+          "multiple": true,
+          "min_items": 0
+        },
+        {
+          "name": "budget",
+          "kind": { "type": "scalar", "validation": "unsigned_int" },
+          "optional": true,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "coin-to-account",
+      "source_module": "pysui.sui.sui_common.async_txn",
+      "group": "Coin Management",
+      "mode": "write",
+      "pageable": false,
+      "args": [
+        {
+          "name": "owner",
+          "kind": { "type": "scalar", "validation": "sui_address" },
+          "optional": true,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        },
+        {
+          "name": "coin_from",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": ["Tx Gas"],
+          "source": "owned_coins",
+          "multiple": false
+        },
+        {
+          "name": "amount",
+          "kind": { "type": "scalar", "validation": "unsigned_int" },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "recipient",
+          "kind": { "type": "scalar", "validation": "sui_address" },
+          "optional": true,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        },
+        {
+          "name": "gas_mode",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": ["Use Gas Coin", "Use Account Balance", "Auto Select"],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "gas",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": [],
+          "source": "owned_coins",
+          "multiple": true,
+          "min_items": 0
+        },
+        {
+          "name": "budget",
+          "kind": { "type": "scalar", "validation": "unsigned_int" },
+          "optional": true,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "account-to-coin",
+      "source_module": "pysui.sui.sui_common.async_txn",
+      "group": "Coin Management",
+      "mode": "write",
+      "pageable": false,
+      "args": [
+        {
+          "name": "owner",
+          "kind": { "type": "scalar", "validation": "sui_address" },
+          "optional": true,
+          "default": [],
+          "source": "group_addresses",
+          "multiple": false
+        },
+        {
+          "name": "amount",
+          "kind": { "type": "scalar", "validation": "unsigned_int" },
+          "optional": true,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "gas_mode",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": ["Use Gas Coin", "Use Account Balance", "Auto Select"],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "gas",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": [],
+          "source": "owned_coins",
+          "multiple": true,
+          "min_items": 0
+        },
+        {
+          "name": "budget",
+          "kind": { "type": "scalar", "validation": "unsigned_int" },
+          "optional": true,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    },
+    {
+      "name": "move-struct-to-bcs",
+      "source_module": "pysui.sui.sui_common.move_to_bcs",
+      "group": "Development",
+      "mode": "write",
+      "pageable": false,
+      "custom_ui": true,
+      "args": [
+        {
+          "name": "move_target_file",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": false,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        },
+        {
+          "name": "output_folder",
+          "kind": { "type": "scalar", "validation": "none" },
+          "optional": true,
+          "default": [],
+          "source": "none",
+          "multiple": false
+        }
+      ]
+    }
+  ]
+}

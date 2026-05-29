@@ -63,6 +63,7 @@ class CommandEntry:
     mode: str  # "read" | "write"
     pageable: bool
     args: tuple[ArgSpec, ...]
+    custom_ui: bool = False
 
 
 def _parse_kind(data: dict) -> KindSpec:
@@ -111,11 +112,12 @@ def _parse_command(data: dict) -> CommandEntry:
         mode=data["mode"],
         pageable=data["pageable"],
         args=tuple(_parse_arg(a) for a in data["args"]),
+        custom_ui=data.get("custom_ui", False),
     )
 
 
 def _verify_command(entry: CommandEntry, fatal: bool) -> bool:
-    """Verify source_module is importable and name exists within it."""
+    """Verify source_module is importable; for read commands also verify class exists."""
     try:
         mod = importlib.import_module(entry.source_module)
     except ModuleNotFoundError as exc:
@@ -124,7 +126,7 @@ def _verify_command(entry: CommandEntry, fatal: bool) -> bool:
             raise RuntimeError(msg) from exc
         logger.warning(msg)
         return False
-    if not hasattr(mod, entry.name):
+    if entry.mode == "read" and not hasattr(mod, entry.name):
         msg = f"Command '{entry.name}' not found in module '{entry.source_module}'"
         if fatal:
             raise RuntimeError(msg)
@@ -155,6 +157,20 @@ def load_command_registry() -> dict[str, CommandEntry]:
 
     registry: dict[str, CommandEntry] = {}
     for cmd_data in pysui_data["commands"]:
+        entry = _parse_command(cmd_data)
+        _verify_command(entry, fatal=True)
+        registry[entry.name] = entry
+
+    utils_ref = files("tpysui") / "data" / "pysui_utilities.json"
+    with utils_ref.open("r") as fh:
+        utils_data = json.load(fh)
+
+    try:
+        jsonschema.validate(instance=utils_data, schema=schema)
+    except jsonschema.ValidationError as exc:
+        raise RuntimeError(f"pysui_utilities.json invalid: {exc.message}") from exc
+
+    for cmd_data in utils_data["commands"]:
         entry = _parse_command(cmd_data)
         _verify_command(entry, fatal=True)
         registry[entry.name] = entry

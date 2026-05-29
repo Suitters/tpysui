@@ -11,6 +11,7 @@ from pathlib import Path
 from .base import (
     ActiveState, ActiveStateChanged, AddressInfo, ChainInfo, GasObjectInfo,
     GroupInfo, GroupProtocol, ObjectSummaryInfo, ProfileInfo, ReadResult, SuiService,
+    UtilityResultDTO,
 )
 
 _FAKE_MNEMONIC = (
@@ -329,3 +330,18 @@ class FauxSuiService(SuiService):
     async def get_coin_balances(self, owner: str) -> str:
         await asyncio.sleep(0.05)
         return '{"balances": [{"coin_type": "0x2::sui::SUI", "total_balance": "3500000000"}]}'
+
+    async def run_utility(self, name: str, args: dict, simulate: bool) -> UtilityResultDTO:
+        await asyncio.sleep(0.05)
+        return UtilityResultDTO(
+            simulated=simulate,
+            success=True,
+            error=None,
+            digest=None if simulate else "FauxDigest1234567890abcdef",
+            gas_used=123456,
+            mutated=["0x" + "aa" * 32],
+            created=[],
+            deleted=[],
+            events=[],
+            raw_json=f'{{"stub": "faux result for {name}", "simulate": {simulate}}}',
+        )

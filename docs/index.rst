@@ -54,3 +54,4 @@ Documentation
 - `Dashboard <dashboard.rst>`_ — wallet overview: chain info, gas, objects, balances
 - `Configuration & Key Management <config.rst>`_ — groups, profiles, and addresses
 - `Data Reads <reads.rst>`_ — query on-chain data with built-in commands
+- `Utilities <utilities.rst>`_ — coin management, transfers, and development tools

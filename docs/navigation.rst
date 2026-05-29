@@ -19,6 +19,9 @@ The left sidebar lists the six functional areas of tpysui:
 1. **Dashboard** — wallet overview
 2. **Configuration & Key Mgmt** — manage groups, profiles, and addresses
 3. **Data Reads** — query on-chain data
+4. **Utilities** — coin management, transfers, and development tools
+5. **Transaction Builder** — not yet implemented
+6. **UCI Command Development** — not yet implemented
 
 Use the arrow keys to move between items in the sidebar, or use the
 keyboard shortcuts below.
@@ -38,6 +41,8 @@ Keyboard Shortcuts
      - Switch to Configuration & Key Mgmt
    * - ``Ctrl+3``
      - Switch to Data Reads
+   * - ``Ctrl+4``
+     - Switch to Utilities
    * - ``Ctrl+Q``
      - Quit tpysui
 

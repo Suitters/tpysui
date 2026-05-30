@@ -105,19 +105,19 @@ Coin Management
    * - Command
      - Description
    * - ``merge-coin``
-     - Merge one or more coins into a target coin.
+     - Merge one or more coins to a primary coin.
    * - ``split-coin``
-     - Split a coin into new coins of specified MIST amounts.
+     - Create a new coin(s) with the defined amount(s), split from the provided coin.
    * - ``split-coin-equally``
-     - Split a coin into *N* equal parts.
+     - Split one coin into equal parts and transfer all to transaction signer.
    * - ``smash-coins``
-     - Merge all SUI coins in the wallet into one. Cannot be simulated.
+     - Merges one, more or all Sui coins in wallet to 1 Sui coin. Cannot be simulated.
    * - ``splay-coins``
-     - Distribute SUI across multiple coins or recipients. Cannot be simulated.
+     - Distributes coins to current wallet or to multiple wallets. Cannot be simulated.
    * - ``coin-to-account``
-     - Move a MIST amount from a coin object into the SUI account balance.
+     - Moves Sui balance from Sui coins to account balance.
    * - ``account-to-coin``
-     - Mint a new coin object from the SUI account balance.
+     - Convert some or all balance in account balance to Sui coin.
 
 Transfers
 ~~~~~~~~~
@@ -129,11 +129,11 @@ Transfers
    * - Command
      - Description
    * - ``transfer-object``
-     - Transfer one or more owned objects to a recipient address.
+     - Transfer one or more objects to recipient wallet.
    * - ``transfer-sui``
-     - Transfer a MIST amount of SUI to a recipient from a single coin.
+     - Transfer a Sui coin object to a recipient.
    * - ``pay-sui``
-     - Split a coin and pay multiple recipients in a single transaction.
+     - Pay recipient Sui in mists.
 
 Development
 ~~~~~~~~~~~
@@ -145,7 +145,7 @@ Development
    * - Command
      - Description
    * - ``move-struct-to-bcs``
-     - Generate Python BCS dataclasses from on-chain Move struct definitions.
+     - Analyzes Sui Move Structure and generates python BCS models.
        Uses a custom directive editor — see `move-struct-to-bcs`_ below.
 
 move-struct-to-bcs

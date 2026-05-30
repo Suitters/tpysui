@@ -41,6 +41,7 @@ class ReadsScreen(Widget):
                     allow_blank=True,
                     prompt="Select a read command…",
                 )
+            yield Label("", id="cmd_desc_lbl", classes="cmd_desc_lbl")
             with Horizontal(id="action_row"):
                 yield Button("Args...", id="btn_args", variant="primary", disabled=True)
                 yield Label("", id="status_lbl")
@@ -103,6 +104,7 @@ class ReadsScreen(Widget):
         if event.value is Select.BLANK:
             self._current_cmd = None
             self._disable_actions()
+            self.query_one("#cmd_desc_lbl", Label).update("")
             return
         cmd_name = str(event.value)
         self._current_cmd = cmd_name
@@ -110,6 +112,7 @@ class ReadsScreen(Widget):
         entry: CommandEntry | None = self.app.command_registry.get(cmd_name)  # type: ignore[attr-defined]
         if entry is None:
             return
+        self.query_one("#cmd_desc_lbl", Label).update(entry.description)
         if not entry.args:
             self._last_args_by_cmd.setdefault(cmd_name, {})
         self.query_one("#btn_args").disabled = not bool(entry.args)

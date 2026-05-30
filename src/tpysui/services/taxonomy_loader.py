@@ -64,6 +64,7 @@ class CommandEntry:
     pageable: bool
     args: tuple[ArgSpec, ...]
     custom_ui: bool = False
+    description: str = ""
 
 
 def _parse_kind(data: dict) -> KindSpec:
@@ -113,6 +114,7 @@ def _parse_command(data: dict) -> CommandEntry:
         pageable=data["pageable"],
         args=tuple(_parse_arg(a) for a in data["args"]),
         custom_ui=data.get("custom_ui", False),
+        description=data.get("description", ""),
     )
 
 

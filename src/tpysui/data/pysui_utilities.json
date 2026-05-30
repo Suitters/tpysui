@@ -2,6 +2,7 @@
   "commands": [
     {
       "name": "transfer-object",
+      "description": "Transfer one or more objects to recipient wallet.",
       "source_module": "pysui.sui.sui_common.async_txn",
       "group": "Transfers",
       "mode": "write",
@@ -61,6 +62,7 @@
     },
     {
       "name": "transfer-sui",
+      "description": "Transfer a Sui coin object to a recipient.",
       "source_module": "pysui.sui.sui_common.async_txn",
       "group": "Transfers",
       "mode": "write",
@@ -127,6 +129,7 @@
     },
     {
       "name": "pay-sui",
+      "description": "Pay recipient Sui in mists.",
       "source_module": "pysui.sui.sui_common.async_txn",
       "group": "Transfers",
       "mode": "write",
@@ -201,6 +204,7 @@
     },
     {
       "name": "merge-coin",
+      "description": "Merge one or more coins to a primary coin.",
       "source_module": "pysui.sui.sui_common.async_txn",
       "group": "Coin Management",
       "mode": "write",
@@ -260,6 +264,7 @@
     },
     {
       "name": "split-coin",
+      "description": "Create a new coin(s) with the defined amount(s), split from the provided coin.",
       "source_module": "pysui.sui.sui_common.async_txn",
       "group": "Coin Management",
       "mode": "write",
@@ -319,6 +324,7 @@
     },
     {
       "name": "split-coin-equally",
+      "description": "Split one coin into equal parts and transfer all to transaction signer.",
       "source_module": "pysui.sui.sui_common.async_txn",
       "group": "Coin Management",
       "mode": "write",
@@ -377,6 +383,7 @@
     },
     {
       "name": "smash-coins",
+      "description": "Merges one, more or all Sui coins in wallet to 1 Sui coin.",
       "source_module": "pysui.sui.sui_common.async_txn",
       "group": "Coin Management",
       "mode": "write",
@@ -437,6 +444,7 @@
     },
     {
       "name": "splay-coins",
+      "description": "Distributes coins to current wallet or to multiple wallets.",
       "source_module": "pysui.sui.sui_common.async_txn",
       "group": "Coin Management",
       "mode": "write",
@@ -522,6 +530,7 @@
     },
     {
       "name": "coin-to-account",
+      "description": "Moves Sui balance from Sui coins to account balance.",
       "source_module": "pysui.sui.sui_common.async_txn",
       "group": "Coin Management",
       "mode": "write",
@@ -588,6 +597,7 @@
     },
     {
       "name": "account-to-coin",
+      "description": "Convert some or all balance in account balance to Sui coin.",
       "source_module": "pysui.sui.sui_common.async_txn",
       "group": "Coin Management",
       "mode": "write",
@@ -638,6 +648,7 @@
     },
     {
       "name": "move-struct-to-bcs",
+      "description": "Analyzes Sui Move Structure and generates python BCS models.",
       "source_module": "pysui.sui.sui_common.move_to_bcs",
       "group": "Development",
       "mode": "write",

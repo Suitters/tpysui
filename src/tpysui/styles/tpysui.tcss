@@ -491,6 +491,13 @@ ReadsScreen {
     width: auto;
 }
 
+.cmd_desc_lbl {
+    height: 1;
+    width: 1fr;
+    color: $text-muted;
+    padding: 0 1;
+}
+
 /* ── SaveModal ───────────────────────────────────────── */
 
 SaveModal {
@@ -739,21 +746,27 @@ MultipleRow {
 }
 
 MultipleRow > Horizontal {
-    height: 3;
+    height: 1;
     width: 1fr;
     align: left middle;
 }
 
 MultipleRow Label {
     width: auto;
-    height: 3;
+    height: 1;
     padding: 0 1;
     content-align: left middle;
 }
 
 MultipleRow Button {
-    height: 3;
+    height: 1;
 }
+
+MultipleRow Button#edit_btn {
+    background: $success-darken-2;
+    color: $text;
+}
+
 
 /* ── ArgsModal ───────────────────────────────────────── */
 
@@ -812,7 +825,7 @@ CollectorModal #collector_title {
 CollectorModal #entries_scroll {
     height: auto;
     max-height: 14;
-    border: solid $accent;
+    border: solid $success-darken-2;
 }
 
 CollectorModal #staging_area {

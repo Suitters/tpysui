@@ -18,7 +18,7 @@ from textual.widgets import Button, Label
 from ..services.taxonomy_loader import CommandEntry
 
 # Commands that cannot be simulated (they merge all coins; simulation is meaningless).
-_NO_SIMULATE = frozenset({"smash-coins", "splay-coins"})
+_NO_SIMULATE = frozenset({"smash-coins", "splay-coins", "move-struct-to-bcs"})
 
 
 def _fmt_value(v: Any) -> str:

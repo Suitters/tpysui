@@ -48,6 +48,7 @@ class UtilitiesScreen(Widget):
                     allow_blank=True,
                     prompt="Select a utility…",
                 )
+            yield Label("", id="util_desc_lbl", classes="cmd_desc_lbl")
             with Horizontal(id="util_action_row"):
                 yield Button("Args...", id="util_btn_args", variant="primary", disabled=True)
                 yield Label("", id="util_status_lbl")
@@ -108,6 +109,7 @@ class UtilitiesScreen(Widget):
             self._current_cmd = None
             cmd_select.clear()
             self._disable_actions()
+            self.query_one("#util_desc_lbl", Label).update("")
             return
         self._current_group = str(event.value)
         self._current_cmd = None
@@ -121,12 +123,14 @@ class UtilitiesScreen(Widget):
         if event.value is Select.BLANK:
             self._current_cmd = None
             self._disable_actions()
+            self.query_one("#util_desc_lbl", Label).update("")
             return
         cmd_name = str(event.value)
         self._current_cmd = cmd_name
         entry: CommandEntry | None = self.app.command_registry.get(cmd_name)  # type: ignore[attr-defined]
         if entry is None:
             return
+        self.query_one("#util_desc_lbl", Label).update(entry.description)
         if entry.args or entry.custom_ui:
             self._last_args_by_cmd.pop(cmd_name, None)
         else:

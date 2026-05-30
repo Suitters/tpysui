@@ -107,6 +107,7 @@ class MtobcsModal(ModalScreen[dict | None]):
             self._append_target_row(entry)
         self.query_one("#mtobcs_generic_params").display = False
         self._refresh_save_button()
+        self.call_after_refresh(lambda: self.query_one("#staging_type", Select).focus())
 
     def _refresh_save_button(self) -> None:
         btn = self.query_one("#btn_save_config", Button)

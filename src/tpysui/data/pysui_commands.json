@@ -2,6 +2,7 @@
   "commands": [
     {
       "name": "GetCoinMetaData",
+      "description": "Fetch metadata for a specific coin type.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Coin / Balance",
       "mode": "read",
@@ -24,6 +25,7 @@
     },
     {
       "name": "GetAddressCoinBalance",
+      "description": "Fetch the total balance for a specific coin type owned by an address.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Coin / Balance",
       "mode": "read",
@@ -57,6 +59,7 @@
     },
     {
       "name": "GetAddressCoinBalances",
+      "description": "Fetch all coin-type balances for an address.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Coin / Balance",
       "mode": "read",
@@ -77,6 +80,7 @@
     },
     {
       "name": "GetCoins",
+      "description": "Fetch all coin objects of a specific type owned by an address.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Coin / Balance",
       "mode": "read",
@@ -110,6 +114,7 @@
     },
     {
       "name": "GetGas",
+      "description": "Fetch all SUI gas coin objects owned by an address.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Coin / Balance",
       "mode": "read",
@@ -130,6 +135,7 @@
     },
     {
       "name": "GetCoinSummary",
+      "description": "Fetch coin object summary (balance and metadata without content).",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Coin / Balance",
       "mode": "read",
@@ -150,6 +156,7 @@
     },
     {
       "name": "GetStaked",
+      "description": "Fetch all staked SUI coin objects owned by an address.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Staking",
       "mode": "read",
@@ -170,6 +177,7 @@
     },
     {
       "name": "GetDelegatedStakes",
+      "description": "Fetch all delegated-stake (StakedSui) objects owned by an address.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Staking",
       "mode": "read",
@@ -190,6 +198,7 @@
     },
     {
       "name": "GetObject",
+      "description": "Fetch the current state of a single object.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Objects",
       "mode": "read",
@@ -210,6 +219,7 @@
     },
     {
       "name": "GetPastObject",
+      "description": "Fetch a specific version of an object.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Objects",
       "mode": "read",
@@ -241,6 +251,7 @@
     },
     {
       "name": "GetObjectSummary",
+      "description": "Fetch a thin summary (id, version, digest, owner) for a single object.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Objects",
       "mode": "read",
@@ -261,6 +272,7 @@
     },
     {
       "name": "GetObjectContent",
+      "description": "Fetch BCS content for a single object.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Objects",
       "mode": "read",
@@ -281,6 +293,7 @@
     },
     {
       "name": "GetObjectsOwnedByAddress",
+      "description": "Fetch all objects owned by an address.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Objects",
       "mode": "read",
@@ -301,6 +314,7 @@
     },
     {
       "name": "GetObjectsForType",
+      "description": "Fetch all objects of a specific type owned by an address.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Objects",
       "mode": "read",
@@ -332,6 +346,7 @@
     },
     {
       "name": "GetMultipleObjects",
+      "description": "Fetch the current state of multiple objects by ID list.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Objects",
       "mode": "read",
@@ -353,6 +368,7 @@
     },
     {
       "name": "GetMultipleObjectSummary",
+      "description": "Fetch thin summaries (id, version, digest, owner) for a list of objects.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Objects",
       "mode": "read",
@@ -374,6 +390,7 @@
     },
     {
       "name": "GetMultipleObjectContent",
+      "description": "Fetch BCS content for multiple objects.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Objects",
       "mode": "read",
@@ -395,6 +412,7 @@
     },
     {
       "name": "GetMultiplePastObjects",
+      "description": "Fetch specific versions of multiple objects.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Objects",
       "mode": "read",
@@ -436,6 +454,7 @@
     },
     {
       "name": "GetDynamicFields",
+      "description": "Fetch dynamic fields of an object.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Objects",
       "mode": "read",
@@ -456,6 +475,7 @@
     },
     {
       "name": "GetBasicCurrentEpochInfo",
+      "description": "Fetch the minimal current epoch fields needed for gas and expiry building.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Epoch / Chain",
       "mode": "read",
@@ -464,6 +484,7 @@
     },
     {
       "name": "GetEpoch",
+      "description": "Fetch epoch information by ID, or the current epoch if no ID is given.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Epoch / Chain",
       "mode": "read",
@@ -484,6 +505,7 @@
     },
     {
       "name": "GetLatestCheckpoint",
+      "description": "Fetch the latest checkpoint",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Epoch / Chain",
       "mode": "read",
@@ -492,6 +514,7 @@
     },
     {
       "name": "GetCheckpointBySequence",
+      "description": "Fetch a checkpoint by sequence number.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Epoch / Chain",
       "mode": "read",
@@ -512,6 +535,7 @@
     },
     {
       "name": "GetCheckpointByDigest",
+      "description": "Fetch a checkpoint by digest.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Epoch / Chain",
       "mode": "read",
@@ -532,6 +556,7 @@
     },
     {
       "name": "GetChainIdentifier",
+      "description": "Return the chain identifier (network genesis checkpoint digest) as a string.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Epoch / Chain",
       "mode": "read",
@@ -540,6 +565,7 @@
     },
     {
       "name": "GetLatestSuiSystemState",
+      "description": "Fetch the current Sui system state summary.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Epoch / Chain",
       "mode": "read",
@@ -548,6 +574,7 @@
     },
     {
       "name": "GetProtocolConfig",
+      "description": "Fetch protocol configuration for a specific version or current.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Epoch / Chain",
       "mode": "read",
@@ -568,6 +595,7 @@
     },
     {
       "name": "GetCurrentValidators",
+      "description": "Fetch all currently active validators (GQL paging handled via execute_for_all).",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Validators",
       "mode": "read",
@@ -576,6 +604,7 @@
     },
     {
       "name": "GetPackage",
+      "description": "Fetch a Move package by ID.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Packages / Move",
       "mode": "read",
@@ -596,6 +625,7 @@
     },
     {
       "name": "GetPackageVersions",
+      "description": "Fetch all versions of a Move package sharing the same original ID.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Packages / Move",
       "mode": "read",
@@ -616,6 +646,7 @@
     },
     {
       "name": "GetModule",
+      "description": "Fetch a Move module's structure and function definitions.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Packages / Move",
       "mode": "read",
@@ -647,6 +678,7 @@
     },
     {
       "name": "GetMoveDataType",
+      "description": "Fetch a Move struct or enum by name.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Packages / Move",
       "mode": "read",
@@ -689,6 +721,7 @@
     },
     {
       "name": "GetStructure",
+      "description": "Fetch a specific Move struct by name.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Packages / Move",
       "mode": "read",
@@ -731,6 +764,7 @@
     },
     {
       "name": "GetStructures",
+      "description": "Fetch all structs in a Move module (auto-paginated on GraphQL).",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Packages / Move",
       "mode": "read",
@@ -762,6 +796,7 @@
     },
     {
       "name": "GetFunction",
+      "description": "Fetch a specific Move function by name.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Packages / Move",
       "mode": "read",
@@ -804,6 +839,7 @@
     },
     {
       "name": "GetFunctions",
+      "description": "Fetch all functions in a Move module (auto-paginated on GraphQL).",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Packages / Move",
       "mode": "read",
@@ -835,6 +871,7 @@
     },
     {
       "name": "GetNameServiceAddress",
+      "description": "Resolve a Sui name-service name to an address.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Name Service",
       "mode": "read",
@@ -855,6 +892,7 @@
     },
     {
       "name": "GetNameServiceNames",
+      "description": "Resolve an address to its Sui name-service name(s).",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Name Service",
       "mode": "read",
@@ -875,6 +913,7 @@
     },
     {
       "name": "GetTransaction",
+      "description": "Fetch a single transaction by digest.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Transactions",
       "mode": "read",
@@ -895,6 +934,7 @@
     },
     {
       "name": "GetTransactions",
+      "description": "Fetch multiple transactions by digest list.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Transactions",
       "mode": "read",
@@ -916,6 +956,7 @@
     },
     {
       "name": "GetTransactionKind",
+      "description": "Fetch the transaction kind for a single transaction by digest.",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Transactions",
       "mode": "read",
@@ -936,6 +977,7 @@
     },
     {
       "name": "SimulateTransaction",
+      "description": "Simulate a serialized transaction (BCS bytes or base64 string).",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Transactions",
       "mode": "read",
@@ -982,6 +1024,7 @@
     },
     {
       "name": "VerifyTransactionSignature",
+      "description": "Verify a transaction signature (intent scope = TransactionData).",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Verification",
       "mode": "read",
@@ -1024,6 +1067,7 @@
     },
     {
       "name": "VerifyPersonalMessageSignature",
+      "description": "Verify a personal message signature (intent scope = PersonalMessage).",
       "source_module": "pysui.sui.sui_common.sui_commands",
       "group": "Verification",
       "mode": "read",

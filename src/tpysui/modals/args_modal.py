@@ -200,6 +200,14 @@ class CollectorModal(ModalScreen[list | None]):
         for inp in self.query(".staging_other_inp"):
             inp.display = False
         self.query_one("#staging_error_lbl", Label).display = False
+        self.call_after_refresh(self._focus_first_staging)
+
+    def _focus_first_staging(self) -> None:
+        staging = self.query_one("#staging_area")
+        for w in staging.walk_children():
+            if w.can_focus:
+                w.focus()
+                return
 
     def _setup_columns(self, table: DataTable) -> None:
         table.add_column("#", key="idx", width=4)
@@ -482,7 +490,8 @@ class ArgsModal(ModalScreen[dict[str, Any] | None]):
     def compose(self) -> ComposeResult:
         is_write = self._entry.mode == "write"
         with Vertical(id="args_dialog"):
-            yield Label(self._entry.name, id="modal_title")
+            _title = f"{self._entry.name}: {self._entry.description}" if self._entry.description else self._entry.name
+            yield Label(_title, id="modal_title")
             with VerticalScroll(id="args_scroll"):
                 if is_write:
                     util_args = [a for a in self._entry.args if a.name not in _TXN_ARG_NAMES]
@@ -508,6 +517,17 @@ class ArgsModal(ModalScreen[dict[str, Any] | None]):
         self.run_worker(self._load_dynamic(), exclusive=False, group="args_load")
         if self._entry.mode == "write":
             self._sync_gas_availability()
+        self.call_after_refresh(self._focus_first_arg)
+
+    def _focus_first_arg(self) -> None:
+        scroll = self.query_one("#args_scroll", VerticalScroll)
+        for child in scroll.children:
+            if isinstance(child, (MultipleRow, Label)):
+                continue
+            focusables = [w for w in child.walk_children() if w.can_focus]
+            if focusables:
+                focusables[0].focus()
+                return
 
     def on_select_changed(self, event: Select.Changed) -> None:
         if self._entry.mode != "write":

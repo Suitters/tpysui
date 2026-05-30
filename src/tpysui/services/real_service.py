@@ -471,13 +471,16 @@ class RealSuiService(SuiService):
         gas_mode = args.get("gas_mode", "Use Gas Coin")
         budget = args.get("budget")
         gas_list = args.get("gas") or None
-        owner = args.get("owner", "")
+        owner = args.get("owner") or client.config.active_address
         if simulate:
             tx_kind = txer.raw_kind()
-            sim_cmd = _sc.SimulateTransactionKind(
-                tx_kind, {"sender": owner}, checks_enabled=True,
+            result = await client.execute(
+                command=_sc.SimulateTransactionKind(
+                    tx_kind=txer.raw_kind(),
+                    tx_meta={"sender": owner},
+                    gas_selection=True,
+                )
             )
-            result = await client.execute(command=sim_cmd)
         else:
             build_result = await txer.build_and_sign(
                 gas_budget=int(budget) if budget else None,
@@ -500,9 +503,22 @@ class RealSuiService(SuiService):
                 digest=None, gas_used=None,
                 mutated=[], created=[], deleted=[], events=[], raw_json="",
             )
-        data = result.result_data  # ExecutedTransaction proto dataclass
+        data = result.result_data
+        if simulate:
+            raw_json = data.to_json(indent=2) if hasattr(data, "to_json") else str(data)
+            budget = None
+            try:
+                gu = data.transaction.effects.gas_used
+                budget = int(gu.computation_cost) + int(gu.storage_cost)
+            except Exception:
+                pass
+            return UtilityResultDTO(
+                simulated=True, success=True, error=None,
+                digest=None, gas_used=budget,
+                mutated=[], created=[], deleted=[], events=[], raw_json=raw_json,
+            )
         raw_json = data.to_json(indent=2) if hasattr(data, "to_json") else str(data)
-        digest = (data.digest or None) if not simulate else None
+        digest = data.digest or None
         effects = data.effects  # TransactionEffects | None
         gas_used = None
         if effects and effects.gas_used:

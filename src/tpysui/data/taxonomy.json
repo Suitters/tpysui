@@ -135,6 +135,7 @@
         "mode":          { "type": "string", "enum": ["read", "write"], "description": "'read' for query-only commands; 'write' for mutation commands." },
         "pageable":      { "type": "boolean", "description": "True if the result may include a next_page_token. Enables the Next button in the UI." },
         "custom_ui":     { "type": "boolean", "description": "True if this command uses a bespoke modal instead of ArgsModal. Defaults to false." },
+        "description":   { "type": "string", "description": "Short human-readable description shown in the ArgsModal title bar." },
         "args": {
           "type": "array",
           "description": "Ordered list of arguments. next_page_token is never listed here — it is managed internally by the service layer.",

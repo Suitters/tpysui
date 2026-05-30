@@ -21,8 +21,6 @@ from .screens.config_screen import ConfigScreen
 from .screens.dashboard_screen import DashboardScreen
 from .screens.reads_screen import ReadsScreen
 from .screens.utilities_screen import UtilitiesScreen
-from .screens.tx_screen import TxScreen
-from .screens.uci_screen import UciScreen
 
 
 _AREA_LABELS = {
@@ -30,8 +28,6 @@ _AREA_LABELS = {
     "screen-config":    "Config",
     "screen-reads":     "Data Reads",
     "screen-utilities": "Utilities",
-    "screen-tx":        "Tx Builder",
-    "screen-uci":       "UCI Dev",
 }
 
 
@@ -51,8 +47,6 @@ class TpysuiApp(App):
         ("ctrl+2", "area_2", "Config"),
         ("ctrl+3", "area_3", "Data Reads"),
         ("ctrl+4", "area_4", "Utilities"),
-        ("ctrl+5", "area_5", "Tx Builder"),
-        ("ctrl+6", "area_6", "UCI Dev"),
     ]
 
     settings: Settings
@@ -70,8 +64,6 @@ class TpysuiApp(App):
                 yield ConfigScreen(id="screen-config")
                 yield ReadsScreen(id="screen-reads")
                 yield UtilitiesScreen(id="screen-utilities")
-                yield TxScreen(id="screen-tx")
-                yield UciScreen(id="screen-uci")
         yield Footer()
 
     async def action_quit(self) -> None:
@@ -153,12 +145,6 @@ class TpysuiApp(App):
 
     def action_area_4(self) -> None:
         self._switch_area("screen-utilities")
-
-    def action_area_5(self) -> None:
-        self._switch_area("screen-tx")
-
-    def action_area_6(self) -> None:
-        self._switch_area("screen-uci")
 
     def on_sidebar_area_selected(self, msg: "Sidebar.AreaSelected") -> None:
         self._switch_area(msg.screen_id, move_cursor=False)

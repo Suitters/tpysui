@@ -13,16 +13,12 @@ class Sidebar(Tree[str]):
         ("Configuration & Key Mgmt", "screen-config"),
         ("Data Reads",               "screen-reads"),
         ("Utilities",                "screen-utilities"),
-        ("Transaction Builder",      "screen-tx"),
-        ("UCI Command Development",  "screen-uci"),
     ]
     _DESCRIPTIONS = {
         "screen-dashboard": "Active address overview: gas objects, owned objects, coin balances, chain info",
         "screen-config":    "Manage groups, profiles, and addresses in your PysuiConfig",
         "screen-reads":     "Query on-chain data: objects, balances, events, and more",
         "screen-utilities": "Submit transactions: transfers, coin management, and contract calls",
-        "screen-tx":        "Build and inspect Programmable Transaction Blocks (PTBs)",
-        "screen-uci":       "Develop and test UCI commands interactively",
     }
 
     class AreaSelected(Message):

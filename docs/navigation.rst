@@ -11,17 +11,15 @@ All areas are reachable at any time without losing context in other areas.
 Sidebar
 -------
 
-The left sidebar lists the six functional areas of tpysui:
+The left sidebar lists the four functional areas of tpysui:
 
 .. image:: ./placeholder_sidebar.png
-   :alt: tpysui sidebar showing six areas
+   :alt: tpysui sidebar showing four areas
 
 1. **Dashboard** — wallet overview
 2. **Configuration & Key Mgmt** — manage groups, profiles, and addresses
 3. **Data Reads** — query on-chain data
 4. **Utilities** — coin management, transfers, and development tools
-5. **Transaction Builder** — not yet implemented
-6. **UCI Command Development** — not yet implemented
 
 Use the arrow keys to move between items in the sidebar, or use the
 keyboard shortcuts below.

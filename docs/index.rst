@@ -36,7 +36,7 @@ Startup
 On first run, or when no default configuration is found, tpysui presents
 a startup dialog.
 
-.. image:: ./placeholder_startup.png
+.. image:: ./startup.png
    :alt: tpysui startup dialog — New Config or Open Existing
 
 Two options are available:

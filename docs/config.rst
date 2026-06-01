@@ -12,7 +12,7 @@ the sidebar.
 .. contents:: Contents
    :depth: 2
 
-.. image:: ./placeholder_config.png
+.. image:: ./config_group.png
    :alt: tpysui Configuration & Key Mgmt screen
 
 Overview
@@ -24,30 +24,49 @@ A PysuiConfig is organized as a three-level hierarchy:
 - **Profiles** — network endpoint URLs within a group
 - **Addresses** — key pairs (addresses) available within a group
 
+The screen (see screenshot above) shows three tables side by side: Groups on the
+left, Profiles in the centre, and Addresses on the right. Highlighting a group row
+automatically populates the Profiles and Addresses tables for that group.
+
+The active item in each table is marked with ``*``.
+
+Keyboard actions apply to whichever table currently has focus:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 80
+
+   * - Key
+     - Action
+   * - ``n``
+     - New — create a group, profile, or address depending on focus
+   * - ``e``
+     - Edit — edit the selected profile URL or address alias
+   * - ``d``
+     - Delete — delete the selected row
+   * - ``a``
+     - Set Active — make the selected group, profile, or address the active one
+
 Groups
 ------
 
 Creating a Group
 ^^^^^^^^^^^^^^^^
 
-Press ``Ctrl+A`` with focus in the Groups section, or use the **Add Group**
-action. A dialog will prompt for the group name and protocol type (GraphQL
-or gRPC). Standard Mysten profile URLs are populated automatically.
-
-.. image:: ./placeholder_group_create.png
-   :alt: tpysui create group dialog
+Focus the Groups table and press ``n``. A dialog prompts for the group name and
+protocol type (GraphQL or gRPC). Standard Mysten profile URLs are populated
+automatically.
 
 Editing a Group
 ^^^^^^^^^^^^^^^
 
-Select a group and press ``Ctrl+E`` to edit its name or active status.
+Group names cannot be edited directly. Use ``a`` to change the active group.
 
 Deleting a Group
 ^^^^^^^^^^^^^^^^
 
-Select a group and press ``Ctrl+D`` or use the delete action. Deleting a
-group removes all its profiles and addresses. The last remaining group
-cannot be deleted.
+Focus the Groups table, select a group, and press ``d``. Deleting a group removes
+all its profiles and addresses. The last remaining group cannot be deleted.
 
 Profiles
 --------
@@ -57,16 +76,14 @@ Profiles are network endpoint URLs (GraphQL or gRPC) within a group.
 Creating a Profile
 ^^^^^^^^^^^^^^^^^^
 
-Press ``Ctrl+A`` with focus in the Profiles section. Enter the profile
-name and URL in the dialog that appears.
-
-.. image:: ./placeholder_profile_create.png
-   :alt: tpysui create profile dialog
+Focus the Profiles table and press ``n``. Enter the profile name and URL in the
+dialog that appears.
 
 Editing and Deleting
 ^^^^^^^^^^^^^^^^^^^^
 
-Select a profile and press ``Ctrl+E`` to edit, or ``Ctrl+D`` to delete.
+Focus the Profiles table, select a profile, and press ``e`` to edit its URL or
+``d`` to delete it.
 
 Addresses
 ---------
@@ -77,14 +94,14 @@ transactions within a group.
 Creating an Address
 ^^^^^^^^^^^^^^^^^^^
 
-Press ``Ctrl+A`` with focus in the Addresses section. Choose a key scheme
-(ED25519, SECP256k1, or SECP256r1) and optionally provide an alias.
-
-.. image:: ./placeholder_address_create.png
-   :alt: tpysui create address dialog
+Focus the Addresses table and press ``n``. Choose **Generate Keypair** to create
+a new key pair (you will be prompted for an alias and shown the mnemonic phrase),
+or **Import** to import an existing private key with an alias.
 
 Editing and Deleting
 ^^^^^^^^^^^^^^^^^^^^
 
-Select an address and press ``Ctrl+E`` to edit its alias or active status,
-or ``Ctrl+D`` to delete it.
+Focus the Addresses table, select an address, and press ``e`` to rename its alias
+or ``d`` to delete it.
+
+Use ``a`` to make an address the active signing address for the group.

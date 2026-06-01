@@ -11,7 +11,7 @@ Access with ``Ctrl+4`` or by selecting **Utilities** in the sidebar.
 .. contents:: Contents
    :depth: 2
 
-.. image:: ./placeholder_utilities.png
+.. image:: ./utilities.png
    :alt: tpysui Utilities screen showing group and command selectors
 
 Selecting a Utility

@@ -13,7 +13,7 @@ Sidebar
 
 The left sidebar lists the four functional areas of tpysui:
 
-.. image:: ./placeholder_sidebar.png
+.. image:: ./left_nav.png
    :alt: tpysui sidebar showing four areas
 
 1. **Dashboard** — wallet overview
@@ -65,5 +65,5 @@ To create a new configuration:
 3. Enter a filename and press ``Ctrl+S`` to save.
 4. tpysui creates the ``PysuiConfig.json`` file and loads it automatically.
 
-.. image:: ./placeholder_new_config.png
+.. image:: ./new_config.png
    :alt: tpysui new configuration dialog

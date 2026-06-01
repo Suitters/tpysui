@@ -10,9 +10,6 @@ Access with ``Ctrl+3`` or by selecting **Data Reads** in the sidebar.
 .. contents:: Contents
    :depth: 2
 
-.. image:: ./placeholder_reads.png
-   :alt: tpysui Data Reads screen showing command list and result pane
-
 Command List
 ------------
 
@@ -30,8 +27,8 @@ Commands that require arguments must be configured first:
 1. Select the command in the list.
 2. Press **Args** to open the argument collection dialog.
 
-.. image:: ./placeholder_reads_args.png
-   :alt: tpysui Data Reads argument collection dialog
+.. image:: ./get_coins_arg.png
+   :alt: tpysui Data Reads — GetCoins argument collection dialog
 
 3. Fill in the required fields. Address and object ID fields offer
    selection lists populated from the active configuration.
@@ -46,7 +43,7 @@ Results
 
 Query results are displayed in the right panel as formatted JSON.
 
-.. image:: ./placeholder_reads_results.png
+.. image:: ./get_coins_result.png
    :alt: tpysui Data Reads result pane with JSON output
 
 Saving Results

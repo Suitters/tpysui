@@ -10,7 +10,7 @@ Access with ``Ctrl+1`` or by selecting **Dashboard** in the sidebar.
 .. contents:: Contents
    :depth: 2
 
-.. image:: ./placeholder_dashboard.png
+.. image:: ./dashboard.png
    :alt: tpysui Dashboard showing chain strip and three data panes
 
 Chain Strip
@@ -30,35 +30,22 @@ changes.
 Gas Objects
 -----------
 
-The **Gas Objects** pane lists all ``0x2::sui::SUI`` coin objects owned
-by the active address.
-
-.. image:: ./placeholder_dashboard_gas.png
-   :alt: tpysui Dashboard gas objects pane
-
-Each row shows the truncated object ID and its balance in SUI. Hover over
+The **Gas Objects** pane (left, see screenshot above) lists all ``0x2::sui::SUI`` coin objects owned
+by the active address. Each row shows the truncated object ID and its balance in SUI. Hover over
 a row to see the full object ID, version, and digest in a tooltip.
 
 Owned Objects
 -------------
 
-The **Owned Objects** pane lists all other objects owned by the active
-address (gas coins are excluded).
-
-.. image:: ./placeholder_dashboard_objects.png
-   :alt: tpysui Dashboard owned objects pane
-
-Each row shows the truncated object ID. Hover over a row to see the full
+The **Owned Objects** pane (center, see screenshot above) lists all other objects owned by the active
+address (gas coins are excluded). Each row shows the truncated object ID. Hover over a row to see the full
 object ID, type, version, and digest.
 
 Coin Balances
 -------------
 
-The **Coin Balances** pane displays all coin types held by the active
+The **Coin Balances** pane (right, see screenshot above) displays all coin types held by the active
 address, including non-SUI coins, as a JSON summary.
-
-.. image:: ./placeholder_dashboard_balances.png
-   :alt: tpysui Dashboard coin balances pane
 
 Refresh
 -------

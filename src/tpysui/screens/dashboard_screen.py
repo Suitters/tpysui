@@ -56,6 +56,8 @@ class DashboardScreen(Widget):
 
     async def on_show(self) -> None:
         if self._last_state is None:
+            if not hasattr(self.app, "service"):
+                return
             state = await self.app.service.active_state()  # type: ignore[attr-defined]
             self._last_state = state
             self._load_chain()

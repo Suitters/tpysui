@@ -4,12 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-doc8 = "*"
 pathvalidate = "*"
-twine = "*"
-build = "*"
-pip = "*"
-textual-dev = "*"
 textual = ">=8.2.7"
 tomli-w = "*"
 tomli = "*"
@@ -17,6 +12,9 @@ pysui = {file = "../../frankc01/pysui", editable = true}
 betterproto2 = "~=0.9.0"
 
 [dev-packages]
+doc8 = "*"
+twine = "*"
+build = "*"
 textual-dev = "*"
 
 [requires]

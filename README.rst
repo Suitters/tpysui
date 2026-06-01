@@ -1,19 +1,19 @@
 ====================================================================
-tpysui - Pysui TUI application to manage Pysui or Sui Configurations
+tpysui — Terminal UI for PysuiConfiguration Management
 ====================================================================
 
-BETA BETA BETA
-
-A console TUI. Currently supports managing (create/edit)
-PysuiConfig.json as well as Mysten SUI client.yaml.
+A keyboard-driven console TUI for creating, editing, and managing
+``PysuiConfig.json`` files used by the `pysui <https://github.com/FrankC01/pysui>`_
+Sui blockchain SDK.
 
 Features
 --------
 
-* Create new or modify existing PysuiConfig.json file
-* Modify existing Mysten Sui client.yaml
-* Save existing PysuiConfig.json to new PysuiConfig.json file
-* Add, modify or delete Groups, Profiles and Identities
+* Create new or open existing ``PysuiConfig.json`` files
+* Add, edit, and delete Groups, Profiles, and Addresses
+* Import existing Mysten Sui ``client.yaml`` into a group
+* Query on-chain data with 44 built-in read commands
+* Coin management utilities: merge, transfer, and split SUI
 
 Installing ``tpysui`` will also install ``pysui`` and ``pysui-fastcrypto``
 which requires having Rust installed. If you do not have Rust and don't want
@@ -25,24 +25,24 @@ Install
 -------
 
 #. Activate, or create and activate, a virtual environment
-#. Install ``tpysui`` using environment install tools (e.g. pip, pipenv, etc.)
-#. For pip :code:`pip install tpysui` from PyPi. See install notes in pysui_
-#. Run :code:`tpysui` from command line
+#. Install ``tpysui`` using pip: :code:`pip install tpysui`
+#. Run :code:`tpysui` from the command line
 
 Clone
 -----
 
-``tpusui`` uses pipenv, if you have not installed, do so.
+``tpysui`` uses pipenv. If you have not installed it, do so first.
 
 #. Clone the github repo
-#. ``cd tpysui``
-#. ``pipenv shell``
-#. If needed manually install ``pysui-fastcrypto``. See install notes in pysui_
-#. ``pipenv install``
-#. ``python -m src.tpysui.tpysui``
+#. :code:`cd tpysui`
+#. :code:`pipenv shell`
+#. If needed, manually install ``pysui-fastcrypto``. See install notes in pysui_
+#. :code:`pipenv install`
+#. :code:`tpysui`
 
 Documentation
 -------------
-See Documentation_ for operations help
 
-.. _Documentation: https://github.com/suitters/tpysui/blob/main/docs/tpysui.rst
+See Documentation_ for full usage help.
+
+.. _Documentation: https://github.com/suitters/tpysui/blob/main/docs/index.rst

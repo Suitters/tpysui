@@ -64,7 +64,7 @@ class ReadsScreen(Widget):
 
     async def on_show(self) -> None:
         if not self._cmds_populated:
-            options = [(name, name) for name in self.app.command_registry]  # type: ignore[attr-defined]
+            options = [(name, name) for name, entry in self.app.command_registry.items() if entry.mode == "read"]  # type: ignore[attr-defined]
             self.query_one("#cmd_select", Select).set_options(options)
             self._cmds_populated = True
 

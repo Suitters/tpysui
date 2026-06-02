@@ -9,7 +9,6 @@ textual = ">=8.2.7"
 tomli-w = "*"
 tomli = "*"
 pysui = {file = "../../frankc01/pysui", editable = true}
-betterproto2 = "~=0.9.0"
 
 [dev-packages]
 doc8 = "*"

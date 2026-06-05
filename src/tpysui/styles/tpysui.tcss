@@ -65,10 +65,19 @@ ActiveStateBar #title-row {
     background: $primary;
     align: center middle;
 }
+ActiveStateBar #title-spacer {
+    width: 1fr;
+}
 ActiveStateBar #title-text {
     text-style: bold;
     color: $text;
     width: auto;
+}
+ActiveStateBar #title-version {
+    width: 1fr;
+    text-align: right;
+    color: $text-muted;
+    padding: 0 1;
 }
 ActiveStateBar #state-row {
     height: 1;

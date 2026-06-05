@@ -13,6 +13,7 @@ from textual.widget import Widget
 from textual.widgets import Static
 
 from ..services.base import ActiveState
+from ..version import __version__
 
 
 class _StateField(Static):
@@ -46,7 +47,9 @@ class ActiveStateBar(Widget):
 
     def compose(self) -> ComposeResult:
         with Horizontal(id="title-row"):
+            yield Static("", id="title-spacer")
             yield Static("tpysui", id="title-text")
+            yield Static(f"v{__version__}", id="title-version")
         with Horizontal(id="state-row"):
             yield Static("Config:", classes="state-key")
             yield _StateField(

@@ -3,7 +3,7 @@ tpysui — Terminal UI for PysuiConfiguration Management
 ====================================================================
 
 A keyboard-driven console TUI for creating, editing, and managing
-``PysuiConfig.json`` files used by the `pysui <https://github.com/FrankC01/pysui>`_
+``PysuiConfig.json`` files used by the `pysui <https://github.com/FrankC01/pysui>`__
 Sui blockchain SDK.
 
 Features

@@ -9,11 +9,13 @@ Sui blockchain SDK.
 Features
 --------
 
-* Create new or open existing ``PysuiConfig.json`` files
-* Add, edit, and delete Groups, Profiles, and Addresses
-* Import existing Mysten Sui ``client.yaml`` into a group
-* Query on-chain data with 44 built-in read commands
-* Coin management utilities: merge, transfer, and split SUI
+* Four-area TUI layout: Dashboard, Configuration & Key Management, Data Reads, and Utilities
+* Wallet Dashboard with chain strip, gas, objects, and balances panes
+* Data-driven command taxonomy with 44 read commands and dynamic arg collection
+* 10 wallet utility commands with Simulate/Execute workflow
+* ``move-struct-to-bcs`` directive support with dedicated launch and edit modals
+* Command and utility descriptions displayed in select dropdowns
+* Version banner displayed in top-right of app
 
 Installing ``tpysui`` will also install ``pysui`` and ``pysui-fastcrypto``
 which requires having Rust installed. If you do not have Rust and don't want

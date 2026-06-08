@@ -5,18 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.4.2] - Unpublished
+## [1.0.0] - 2026-06-08
+
+This release is a complete rewrite that refactored the entire codebase. It introduces support for pysui 1.0.0 and pysui-fastcrypto 0.7.3.
 
 ### Added
+
+- Four-area TUI layout: Dashboard, Configuration & Key Management, Data Reads, and Utilities
+- Wallet Dashboard with chain strip, gas, objects, and balances panes
+- Data-driven command taxonomy (`pysui_commands.json`) with 44 read commands and dynamic `ArgsModal` arg collection
+- 10 wallet utility commands (`pysui_utilities.json`) with Simulate/Execute workflow
+- `move-struct-to-bcs` directive support with dedicated launch and edit modals
+- Command and utility descriptions displayed in select dropdowns
+- Version banner displayed in top-right of app
+- Screenshots and updated documentation
 
 ### Fixed
 
 ### Changed
 
-- bumped Textual to 6.7.1
-- bumped pysui dependency range
+- Complete rewrite: new `src/` layout, service layer with DTO firewall, Textual 8.x framework
+- "Data Writes" renamed to "Utilities"
+- Replaced hardcoded command registry with taxonomy-driven architecture
 
 ### Removed
+
+- Legacy command registry (`command_registry.py`) and hardcoded `_COMMAND_MAP` / `_make_arg_widget` approach
 
 ## [0.4.1] - 2025-10-16
 

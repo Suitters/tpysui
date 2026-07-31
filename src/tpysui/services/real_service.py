@@ -6,6 +6,7 @@
 from pysui import PysuiConfiguration
 from pysui.abstracts.client_keypair import SignatureScheme
 from pysui.sui.sui_common.config import confgroup as _cg
+from pysui.sui.sui_common.config.confgroup import NetworkType
 from pysui.sui.sui_common.factory import client_factory
 from pysui.sui.sui_common import sui_commands as _sc
 
@@ -13,6 +14,7 @@ from .base import (
     ActiveState, AddressInfo, ChainInfo, GasObjectInfo, GroupInfo, GroupProtocol,
     ObjectSummaryInfo, ProfileInfo, ReadResult, SuiService,
 )
+from ..constants import STANDARD_PROFILE_NETWORK_TYPES
 
 _COMMAND_MAP: dict[str, type] = {
     "GetCoinMetaData": _sc.GetCoinMetaData,
@@ -131,6 +133,7 @@ class RealSuiService(SuiService):
                 group_name=group_name,
                 url=p.url,
                 is_active=(p.profile_name == group.using_profile),
+                network_type=p.network_type.name,
             )
             for p in group.profiles
         ]
@@ -159,6 +162,9 @@ class RealSuiService(SuiService):
                     "profile_name": p["name"], "url": p["url"],
                     "faucet_url": None, "faucet_status_url": None,
                     "make_active": (i == 0),
+                    "network_type": NetworkType[
+                        STANDARD_PROFILE_NETWORK_TYPES.get(p["name"], p.get("network_type", "LOCAL"))
+                    ],
                 }
                 for i, p in enumerate(profiles)
             ]
@@ -180,6 +186,9 @@ class RealSuiService(SuiService):
                 self._cfg.new_profile(
                     profile_name=p["name"], url=p["url"],
                     in_group=name, persist=False,
+                    network_type=NetworkType[
+                        STANDARD_PROFILE_NETWORK_TYPES.get(p["name"], p.get("network_type", "LOCAL"))
+                    ],
                 )
             self._cfg.save()
         group = self._cfg.model.get_group(group_name=name)
@@ -200,20 +209,32 @@ class RealSuiService(SuiService):
         self._cfg.make_active(group_name=name, persist=True)
         return await self.active_state()
 
-    async def create_profile(self, group_name: str, name: str, url: str) -> ProfileInfo:
-        self._cfg.new_profile(profile_name=name, url=url, in_group=group_name, persist=True)
+    async def create_profile(
+        self, group_name: str, name: str, url: str, network_type: str
+    ) -> ProfileInfo:
+        self._cfg.new_profile(
+            profile_name=name, url=url, in_group=group_name, persist=True,
+            network_type=NetworkType[network_type],
+        )
         group = self._cfg.model.get_group(group_name=group_name)
         return ProfileInfo(
             name=name, group_name=group_name, url=url,
             is_active=(name == group.using_profile),
+            network_type=network_type,
         )
 
-    async def update_profile(self, group_name: str, name: str, url: str) -> ProfileInfo:
-        self._cfg.update_profile(profile_name=name, url=url, in_group=group_name, persist=True)
+    async def update_profile(
+        self, group_name: str, name: str, url: str, network_type: str
+    ) -> ProfileInfo:
+        self._cfg.update_profile(
+            profile_name=name, url=url, in_group=group_name, persist=True,
+            network_type=NetworkType[network_type],
+        )
         group = self._cfg.model.get_group(group_name=group_name)
         return ProfileInfo(
             name=name, group_name=group_name, url=url,
             is_active=(name == group.using_profile),
+            network_type=network_type,
         )
 
     async def delete_profile(self, group_name: str, name: str) -> None:

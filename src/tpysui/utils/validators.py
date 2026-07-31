@@ -31,3 +31,20 @@ def valid_base58(v: str) -> bool:
 
 def valid_unsigned_int(v: str) -> bool:
     return v.isdigit()
+
+
+def suggest_network_type(url: str) -> str:
+    """Suggest a NETWORK_TYPES value by matching well-known Sui URL patterns.
+
+    Returns "LOCAL" as the default when no known pattern matches.
+    """
+    lowered = url.lower()
+    if "localhost" in lowered or "127.0.0.1" in lowered:
+        return "LOCAL"
+    if "devnet" in lowered:
+        return "DEVELOP"
+    if "testnet" in lowered:
+        return "TEST"
+    if "mainnet" in lowered:
+        return "PRODUCTION"
+    return "LOCAL"

@@ -26,13 +26,13 @@ _INIT_GROUPS: list[GroupInfo] = [
 
 _INIT_PROFILES: dict[str, list[ProfileInfo]] = {
     "sui_config": [
-        ProfileInfo(name="mainnet",     group_name="sui_config", url="https://sui-mainnet.mystenlabs.com/graphql", is_active=True),
-        ProfileInfo(name="testnet",     group_name="sui_config", url="https://sui-testnet.mystenlabs.com/graphql", is_active=False),
-        ProfileInfo(name="devnet",      group_name="sui_config", url="https://sui-devnet.mystenlabs.com/graphql",  is_active=False),
+        ProfileInfo(name="mainnet",     group_name="sui_config", url="https://sui-mainnet.mystenlabs.com/graphql", is_active=True,  network_type="PRODUCTION"),
+        ProfileInfo(name="testnet",     group_name="sui_config", url="https://sui-testnet.mystenlabs.com/graphql", is_active=False, network_type="TEST"),
+        ProfileInfo(name="devnet",      group_name="sui_config", url="https://sui-devnet.mystenlabs.com/graphql",  is_active=False, network_type="DEVELOP"),
     ],
     "devnet_cfg": [
-        ProfileInfo(name="devnet_node", group_name="devnet_cfg", url="https://fullnode.devnet.sui.io:443", is_active=True),
-        ProfileInfo(name="localnet",    group_name="devnet_cfg", url="http://localhost:9000",              is_active=False),
+        ProfileInfo(name="devnet_node", group_name="devnet_cfg", url="https://fullnode.devnet.sui.io:443", is_active=True,  network_type="DEVELOP"),
+        ProfileInfo(name="localnet",    group_name="devnet_cfg", url="http://localhost:9000",              is_active=False, network_type="LOCAL"),
     ],
 }
 
@@ -117,7 +117,7 @@ class FauxSuiService(SuiService):
     ) -> GroupInfo:
         await asyncio.sleep(0.05)
         plist = [
-            ProfileInfo(name=p["name"], group_name=name, url=p["url"], is_active=(i == 0))
+            ProfileInfo(name=p["name"], group_name=name, url=p["url"], is_active=(i == 0), network_type=p.get("network_type", "LOCAL"))
             for i, p in enumerate(profiles)
         ]
         alist = [
@@ -184,22 +184,22 @@ class FauxSuiService(SuiService):
 
     # --- profile mutations ---
 
-    async def create_profile(self, group_name: str, name: str, url: str) -> ProfileInfo:
+    async def create_profile(self, group_name: str, name: str, url: str, network_type: str) -> ProfileInfo:
         await asyncio.sleep(0.05)
         plist = self._profiles.setdefault(group_name, [])
-        p = ProfileInfo(name=name, group_name=group_name, url=url, is_active=not plist)
+        p = ProfileInfo(name=name, group_name=group_name, url=url, is_active=not plist, network_type=network_type)
         plist.append(p)
         g = self._find_group(group_name)
         if g:
             self._replace_group(replace(g, profile_count=len(plist)))
         return p
 
-    async def update_profile(self, group_name: str, name: str, url: str) -> ProfileInfo:
+    async def update_profile(self, group_name: str, name: str, url: str, network_type: str) -> ProfileInfo:
         await asyncio.sleep(0.05)
         plist = self._profiles.get(group_name, [])
         for i, p in enumerate(plist):
             if p.name == name:
-                updated = replace(p, url=url)
+                updated = replace(p, url=url, network_type=network_type)
                 plist[i] = updated
                 return updated
         raise ValueError(f"Profile {name!r} not found in group {group_name!r}")

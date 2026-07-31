@@ -30,6 +30,7 @@ class ProfileInfo:
     group_name: str
     url: str
     is_active: bool
+    network_type: str
 
 
 @dataclass(frozen=True)
@@ -147,10 +148,14 @@ class SuiService(ABC):
     async def set_active_group(self, name: str) -> ActiveState: ...
 
     @abstractmethod
-    async def create_profile(self, group_name: str, name: str, url: str) -> ProfileInfo: ...
+    async def create_profile(
+        self, group_name: str, name: str, url: str, network_type: str
+    ) -> ProfileInfo: ...
 
     @abstractmethod
-    async def update_profile(self, group_name: str, name: str, url: str) -> ProfileInfo: ...
+    async def update_profile(
+        self, group_name: str, name: str, url: str, network_type: str
+    ) -> ProfileInfo: ...
 
     @abstractmethod
     async def delete_profile(self, group_name: str, name: str) -> None: ...

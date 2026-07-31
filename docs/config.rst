@@ -71,19 +71,27 @@ all its profiles and addresses. The last remaining group cannot be deleted.
 Profiles
 --------
 
-Profiles are network endpoint URLs (GraphQL or gRPC) within a group.
+Profiles are network endpoint URLs (GraphQL or gRPC) within a group. Each
+profile requires a **Network Type** (LOCAL, DEVELOP, TEST, or PRODUCTION) to
+specify the nature of the target network.
+
+The Profiles table shows Name, URL, and Network Type columns, with the active
+profile marked with ``*``.
 
 Creating a Profile
 ^^^^^^^^^^^^^^^^^^
 
-Focus the Profiles table and press ``n``. Enter the profile name and URL in the
-dialog that appears.
+Focus the Profiles table and press ``n``. The create dialog prompts for profile
+name, URL, and network type (from a dropdown). The network type is auto-suggested
+based on the URL (e.g., localhost/127.0.0.1 → LOCAL, "devnet" in URL → DEVELOP,
+"testnet" in URL → TEST, "mainnet" in URL → PRODUCTION), but you can override
+the suggestion.
 
 Editing and Deleting
 ^^^^^^^^^^^^^^^^^^^^
 
-Focus the Profiles table, select a profile, and press ``e`` to edit its URL or
-``d`` to delete it.
+Focus the Profiles table, select a profile, and press ``e`` to edit its name, URL,
+or network type, or ``d`` to delete it.
 
 Addresses
 ---------

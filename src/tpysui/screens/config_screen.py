@@ -35,7 +35,7 @@ class ConfigScreen(Widget):
         self.query_one("#groups-table",    DataTable).add_columns(
             "Active", "Name", "Protocol", "Profiles", "Addresses"
         )
-        self.query_one("#profiles-table",  DataTable).add_columns("Active", "Name", "URL")
+        self.query_one("#profiles-table",  DataTable).add_columns("Active", "Name", "URL", "Network Type")
         self.query_one("#addresses-table", DataTable).add_columns("Active", "Alias", "Address", "Scheme")
 
     def compose(self) -> ComposeResult:
@@ -133,10 +133,10 @@ class ConfigScreen(Widget):
         pt = self.query_one("#profiles-table",  DataTable)
         at = self.query_one("#addresses-table", DataTable)
         pt.clear(columns=True)
-        pt.add_columns("Active", "Name", url_label)
+        pt.add_columns("Active", "Name", url_label, "Network Type")
         for p in profiles:
             marker = "*" if p.is_active else ""
-            pt.add_row(marker, p.name, p.url, key=p.name)
+            pt.add_row(marker, p.name, p.url, p.network_type, key=p.name)
         if profiles:
             pt.move_cursor(row=0)
         at.clear()
@@ -207,7 +207,7 @@ class ConfigScreen(Widget):
             return
         def on_result(data: dict | None) -> None:
             if data:
-                self._do_create_profile(data["name"], data["url"])
+                self._do_create_profile(data["name"], data["url"], data["network_type"])
         self.app.push_screen(ProfileModal(), on_result)
 
     def _new_address(self) -> None:
@@ -280,11 +280,12 @@ class ConfigScreen(Widget):
         if not key or not row:
             return
         current_url = row[2]
+        current_network_type = row[3]
         def on_result(data: dict | None) -> None:
             if data:
-                self._do_update_profile(key, data["url"])
+                self._do_update_profile(key, data["url"], data["network_type"])
         self.app.push_screen(
-            ProfileModal(title="Edit Profile", name=key, url=current_url), on_result
+            ProfileModal(title="Edit Profile", name=key, url=current_url, network_type=current_network_type), on_result
         )
 
     def _rename_alias(self) -> None:
@@ -323,13 +324,13 @@ class ConfigScreen(Widget):
         self._reload_groups_select(name)
 
     @work(exclusive=True, group="config-mutate", exit_on_error=False)
-    async def _do_create_profile(self, name: str, url: str) -> None:
-        await self.app.service.create_profile(self._current_group, name, url)
+    async def _do_create_profile(self, name: str, url: str, network_type: str) -> None:
+        await self.app.service.create_profile(group_name=self._current_group, name=name, url=url, network_type=network_type)
         self._load_for_group(self._current_group)
 
     @work(exclusive=True, group="config-mutate", exit_on_error=False)
-    async def _do_update_profile(self, name: str, url: str) -> None:
-        await self.app.service.update_profile(self._current_group, name, url)
+    async def _do_update_profile(self, name: str, url: str, network_type: str) -> None:
+        await self.app.service.update_profile(group_name=self._current_group, name=name, url=url, network_type=network_type)
         self._load_for_group(self._current_group)
 
     @work(exclusive=True, group="config-mutate", exit_on_error=False)

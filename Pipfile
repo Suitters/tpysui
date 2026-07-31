@@ -8,7 +8,7 @@ pathvalidate = "*"
 textual = ">=8.2.7"
 tomli-w = "*"
 tomli = "*"
-pysui = ">=1.0.0"
+pysui = {file = "../../frankc01/pysui", editable = true}
 
 [dev-packages]
 doc8 = "*"

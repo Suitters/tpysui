@@ -20,3 +20,13 @@ GRPC_STANDARD_PROFILES = [
     ("testnet-arch", "archive.testnet.sui.io:443"),
     ("mainnet-arch", "archive.mainnet.sui.io:443"),
 ]
+
+NETWORK_TYPES = ["LOCAL", "DEVELOP", "TEST", "PRODUCTION"]
+
+STANDARD_PROFILE_NETWORK_TYPES = {
+    "devnet": "DEVELOP",
+    "testnet": "TEST",
+    "mainnet": "PRODUCTION",
+    "testnet-arch": "TEST",
+    "mainnet-arch": "PRODUCTION",
+}

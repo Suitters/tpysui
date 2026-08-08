@@ -40,6 +40,7 @@ Clone
 #. :code:`pipenv shell`
 #. If needed, manually install ``pysui-fastcrypto``. See install notes in pysui_
 #. :code:`pipenv install`
+#. :code:`pip install -e .`
 #. :code:`tpysui`
 
 Documentation
